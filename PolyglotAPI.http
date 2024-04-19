@@ -1,0 +1,6 @@
+@PolyglotAPI_HostAddress = http://localhost:5270
+
+GET {{PolyglotAPI_HostAddress}}/languages/
+Accept: application/json
+
+###
