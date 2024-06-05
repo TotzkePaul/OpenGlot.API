@@ -87,13 +87,6 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseCors(builder => builder
-    .WithOrigins("https://openglot.com") // Replace with your frontend URL
-    .AllowAnyMethod()
-    .AllowAnyHeader()
-    .AllowCredentials()
-);
-
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
