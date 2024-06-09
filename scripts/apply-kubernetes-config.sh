@@ -6,4 +6,5 @@ else
 fi
 
 sed -i "s|{{IMAGE_NAME}}|$ECR_REPOSITORY_URI/$ECR_REPOSITORY_API:latest|g" "/tmp/latest_artifact_api/k8s/openglotApi-deployment.yaml"
-kubectl apply -f /tmp/latest_artifact_api/k8s/ --namespace openglot
+kubectl apply -f /tmp/latest_artifact_api/k8s/openglotApi-deployment.yaml --namespace openglot
+kubectl apply -f /tmp/latest_artifact_api/k8s/openglotApi-service.yaml --namespace openglot
