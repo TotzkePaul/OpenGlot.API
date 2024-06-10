@@ -1,61 +1,76 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PolyglotAPI.Data;
+using static PolyglotAPI.Models.Structure;
 
 namespace PolyglotAPI.Controllers
 {
-    [Authorize]
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("[controller]")]
     public class LanguagesController : ControllerBase
     {
-        public class Language
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public string Code { get; set; }
-        }
-
+        private readonly ILanguageRepository _languageRepository;
         private readonly ILogger<LanguagesController> _logger;
 
-        private readonly List<Language>  languages = new List<Language>
-            {
-                new Language { Id = 1, Name = "Spanish", Code = "ES" },
-                new Language { Id = 2, Name = "Chinese", Code = "ZH" },
-                new Language { Id = 3, Name = "English", Code = "EN" },
-                new Language { Id = 4, Name = "Japanese", Code = "JA" },
-                new Language { Id = 5, Name = "Arabic", Code = "AR" },
-                new Language { Id = 6, Name = "Portuguese", Code = "PT" },
-                new Language { Id = 7, Name = "Russian", Code = "RU" }
-                
-            };
-
-        public LanguagesController(ILogger<LanguagesController> logger)
+        public LanguagesController(ILanguageRepository languageRepository, ILogger<LanguagesController> logger)
         {
+            _languageRepository = languageRepository;
             _logger = logger;
         }
 
-        // Write mock endpoints and fields that handles multiple spoken languages
-
-
+        // GET: api/Languages
         [HttpGet]
-        
         public ActionResult<IEnumerable<Language>> GetLanguages()
         {
-            return Ok(languages);
+            _logger.LogInformation("Getting all languages");
+            return Ok(_languageRepository.GetAll());
         }
 
-        
+        // GET: api/Languages/5
         [HttpGet("{id}")]
         public ActionResult<Language> GetLanguage(int id)
         {
-            var language = languages.FirstOrDefault(x => x.Id == id);
-
+            _logger.LogInformation($"Getting language with ID: {id}");
+            var language = _languageRepository.GetById(id);
             if (language == null)
             {
+                _logger.LogWarning($"Language with ID: {id} not found");
                 return NotFound();
             }
-
             return Ok(language);
         }
+
+        // POST: api/Languages
+        [HttpPost]
+        public ActionResult<Language> AddLanguage(Language language)
+        {
+            _logger.LogInformation("Adding a new language");
+            _languageRepository.Add(language);
+            return CreatedAtAction(nameof(GetLanguage), new { id = language.Id }, language);
+        }
+
+        // PUT: api/Languages/5
+        [HttpPut("{id}")]
+        public IActionResult UpdateLanguage(int id, Language language)
+        {
+            if (id != language.Id)
+            {
+                _logger.LogWarning($"Language ID mismatch: {id} != {language.Id}");
+                return BadRequest();
+            }
+            _logger.LogInformation($"Updating language with ID: {id}");
+            _languageRepository.Update(language);
+            return NoContent();
+        }
+
+        // DELETE: api/Languages/5
+        [HttpDelete("{id}")]
+        public IActionResult DeleteLanguage(int id)
+        {
+            _logger.LogInformation($"Deleting language with ID: {id}");
+            _languageRepository.Delete(id);
+            return NoContent();
+        }
     }
+
 }

@@ -15,11 +15,23 @@ COPY . .
 WORKDIR "/src/."
 RUN dotnet build "./PolyglotAPI.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
+#RUN chmod +x wait-for-db.sh 
+#RUN ./wait-for-db.sh db:5432 -t 60
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="${PATH}:/root/.dotnet/tools"
+#RUN dotnet ef database update --project "./PolyglotAPI.csproj" --startup-project "./PolyglotAPI.csproj" --context PolyglotAPI.Data.ApplicationDbContext
+
+
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./PolyglotAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
+
+
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+
 ENTRYPOINT ["dotnet", "PolyglotAPI.dll"]
+#ENTRYPOINT ["sh", "-c", "dotnet ef database update && dotnet PolyglotAPI.dll"]

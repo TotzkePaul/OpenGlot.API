@@ -1,7 +1,13 @@
+using Amazon.Runtime.Internal;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PolyglotAPI.Data;
+using System.Configuration;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,16 +88,52 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine("Connection String: " + connectionString);
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
+
+
+
 var app = builder.Build();
+
+app.Use(async (context, next) =>
+{
+    // Log request details
+    var request = context.Request;
+    request.EnableBuffering();
+    var requestBodyContent = await new StreamReader(request.Body).ReadToEndAsync();
+
+    Console.WriteLine($"Request Method: {request.Method}");
+    Console.WriteLine($"Request Path: {request.Path}");
+    Console.WriteLine($"Request Headers: {string.Join(", ", request.Headers.Select(h => $"{h.Key}: {h.Value}"))}");
+    Console.WriteLine($"Request Body: {requestBodyContent}");
+
+    // Reset the request body stream position for the next middleware to read
+    context.Request.Body.Position = 0;
+
+    await next.Invoke();
+});
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+
 
 app.Run();
