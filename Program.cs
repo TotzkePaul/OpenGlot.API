@@ -88,7 +88,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors(builder => builder
-    .WithOrigins("https://openglot.com") // Replace with your frontend URL
+    .WithOrigins("https://openglot.com","https://beta.openglot.com") // Replace with your frontend URL
     .AllowAnyMethod()
     .AllowAnyHeader()
     .AllowCredentials()
