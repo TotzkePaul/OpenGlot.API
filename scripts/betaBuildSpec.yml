@@ -18,6 +18,8 @@ phases:
       - echo Tagging the image with 'latest'...
       - docker tag $ECR_REPOSITORY_API:$IMAGE_TAG $ECR_REPOSITORY_URI/$ECR_REPOSITORY_API:latest
       - docker tag $ECR_REPOSITORY_API:$IMAGE_TAG $ECR_REPOSITORY_URI/$ECR_REPOSITORY_API:$IMAGE_TAG
+      - $ECR_REPOSITORY_URI/$ECR_REPOSITORY_AP:latest > imagedefinitions.json
+      - cat imagedefinitions.json
   post_build:
     commands:
       - echo Pushing Docker image to Amazon ECR with build ID tag...
@@ -29,3 +31,4 @@ artifacts:
   files: 
     - '**/*'
     - env_vars
+    - imagedefinitions.json
