@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PolyglotAPI.Data;
+using PolyglotAPI.Health;
 using System.Configuration;
 
 
@@ -14,6 +15,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.AddHealthChecks()
+    .AddCheck<CustomHealthCheck>("Custom Check");
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -132,6 +136,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = (check) => true
+});
+
 
 if (app.Environment.IsDevelopment())
 {
