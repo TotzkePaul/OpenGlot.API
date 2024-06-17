@@ -30,10 +30,10 @@ namespace PolyglotAPI.Controllers
 
         // GET: api/Languages/5
         [HttpGet("{id}")]
-        public ActionResult<Language> GetLanguage(int id)
+        public async Task<ActionResult<Language>> GetLanguage(int id)
         {
             _logger.LogInformation($"Getting language with ID: {id}");
-            var language = _languageRepository.GetByIdAsync(id);
+            var language = await _languageRepository.GetByIdAsync(id);
             if (language == null)
             {
                 _logger.LogWarning($"Language with ID: {id} not found");

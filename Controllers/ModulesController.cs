@@ -29,10 +29,10 @@ namespace PolyglotAPI.Controllers
 
         // GET: api/Modules/5
         [HttpGet("{id}")]
-        public ActionResult<Module> GetModule(int id)
+        public async Task<ActionResult<Module>> GetModule(int id)
         {
             _logger.LogInformation($"Getting module with ID: {id}");
-            var module = _moduleRepository.GetByIdAsync(id);
+            var module = await  _moduleRepository.GetByIdAsync(id);
             if (module == null)
             {
                 _logger.LogWarning($"Module with ID: {id} not found");

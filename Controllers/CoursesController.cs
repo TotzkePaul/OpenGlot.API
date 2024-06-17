@@ -29,10 +29,10 @@ namespace PolyglotAPI.Controllers
 
         // GET: api/Courses/5
         [HttpGet("{id}")]
-        public ActionResult<Course> GetCourse(int id)
+        public async Task<ActionResult<Course>> GetCourse(int id)
         {
             _logger.LogInformation($"Getting course with ID: {id}");
-            var course = _courseRepository.GetByIdAsync(id);
+            var course = await _courseRepository.GetByIdAsync(id);
             if (course == null)
             {
                 _logger.LogWarning($"Course with ID: {id} not found");
