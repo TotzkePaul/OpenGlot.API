@@ -1,102 +1,188 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PolyglotAPI.Data;
-using PolyglotAPI.Models;
 using System.Security.Claims;
 
 namespace PolyglotAPI.Controllers
 {
-    [ApiController]
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.EntityFrameworkCore;
+    using PolyglotAPI.Data.Models;
+
     [Route("api/[controller]")]
+    [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly UserProfileContext _context;
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger<UsersController> _logger;
 
-        public UsersController(UserProfileContext context)
+        public UsersController(ApplicationDbContext context, ILogger<UsersController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
-        [HttpGet("profile")]
-        [Authorize]
-        public IActionResult GetUserProfile()
+        // GET: api/Users
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<UserProfile>>> GetUsers()
         {
-            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            var username = User.Claims.FirstOrDefault(c => c.Type == "cognito:username")?.Value;
-            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-
-            if (userId == null)
-            {
-                return Unauthorized();
-            }
-
-            var userProfile = null as UserProfile;//  _context.UserProfiles.FirstOrDefault(u => u.UserId == userId);
-
-            if (userProfile == null)
-            {
-                // Optionally, create a new user profile if not found
-                userProfile = new UserProfile
-                {
-                    UserId = userId,
-                    Username = username,
-                    Email = email,
-                    NativeLanguage = "EN",
-                    TargetLanguage = "CN",
-                    DateOfBirth = DateTime.Today.Date.AddYears(-21),
-                    TimeZone = "+0000"
-                };
-                //_context.UserProfiles.Add(userProfile);
-                //_context.SaveChanges();
-            }
-
-            return Ok(userProfile);
+            _logger.LogInformation("Getting all users");
+            var users = await _context.UserProfiles.ToListAsync();
+            return Ok(users);
         }
 
-        [HttpPost("profile")]
-        [Authorize]
-        public IActionResult UpdateUserProfile(UserProfile updatedProfile)
+        // GET: api/Users/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<UserProfile>> GetUser(string id)
         {
+            _logger.LogInformation($"Getting user with ID: {id}");
+            var user = await _context.UserProfiles
+                                     .Include(u => u.UserRoles)
+                                     .ThenInclude(ur => ur.Role)
+                                     .FirstOrDefaultAsync(u => u.UserId == id);
+
+            if (user == null)
+            {
+                _logger.LogWarning($"User with ID: {id} not found");
+                return NotFound();
+            }
+
+            return Ok(user);
+        }
+        
+        [HttpPut]
+        public async Task<ActionResult<UserProfile>> AddUser(UserProfile user)
+        {
+            _logger.LogInformation("Adding a new user");
+            _context.UserProfiles.Add(user);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetUser), new { id = user.UserId }, user);
+        }
+
+        [HttpPost("{id}")]
+        public async Task<IActionResult> UpdateUser(string id, UserProfile user)
+        {
+            if (id != user.UserId)
+            {
+                _logger.LogWarning($"User ID mismatch: {id} != {user.UserId}");
+                return BadRequest();
+            }
+
             // Check if users is 18 years or older
-            if (updatedProfile.DateOfBirth.Date.AddYears(18) > DateTime.Today.Date)
+            if (user.DateOfBirth.Date.AddYears(18) > DateTime.Today.Date)
             {
                 return BadRequest("User must be 18 years or older");
             }
             // Check if user is updating their own profile
-            if (updatedProfile.UserId != User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value)
+            if (user.UserId != User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value)
             {
                 return Unauthorized();
             }
             // Check if user's target language is different from their native language
-            if (updatedProfile.NativeLanguage == updatedProfile.TargetLanguage ||
-                updatedProfile.NativeLanguage == updatedProfile.TargetLanguage2 ||
-                updatedProfile.NativeLanguage == updatedProfile.TargetLanguage3)
+            if (user.NativeLanguage == user.TargetLanguage ||
+                user.NativeLanguage == user.TargetLanguage2 ||
+                user.NativeLanguage == user.TargetLanguage3)
             {
                 return BadRequest("Target language must be different from native language");
             }
 
+            _logger.LogInformation($"Updating user with ID: {id}");
+            _context.Entry(user).State = EntityState.Modified;
 
-            //var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!UserExists(id))
+                {
+                    _logger.LogWarning($"User with ID: {id} not found");
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
-            //if (userId == null)
-            //{
-            //    return Unauthorized();
-            //}
+            return NoContent();
+        }
 
-            //var userProfile = _context.UserProfiles.FirstOrDefault(u => u.UserId == userId);
+        // DELETE: api/Users/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            _logger.LogInformation($"Deleting user with ID: {id}");
+            var user = await _context.UserProfiles.FindAsync(id);
+            if (user == null)
+            {
+                _logger.LogWarning($"User with ID: {id} not found");
+                return NotFound();
+            }
 
-            //if (userProfile == null)
-            //{
-            //    return NotFound();
-            //}
-            //userProfile.NativeLanguage = updatedProfile.NativeLanguage;
-            //userProfile.TargetLanguage = updatedProfile.TargetLanguage;
-            //userProfile.DateOfBirth = updatedProfile.DateOfBirth;
-            //userProfile.TimeZone = updatedProfile.TimeZone;
+            _context.UserProfiles.Remove(user);
+            await _context.SaveChangesAsync();
 
-            //_context.UserProfiles.Update(userProfile);
-            //_context.SaveChanges();
+            return NoContent();
+        }
 
-            return Ok(updatedProfile);
+        // GET: api/Users/5/Roles
+        [HttpGet("{id}/Roles")]
+        public async Task<ActionResult<IEnumerable<UserRole>>> GetUserRoles(string id)
+        {
+            _logger.LogInformation($"Getting roles for user with ID: {id}");
+            var roles = await _context.UserRoles
+                                      .Where(ur => ur.UserId == id)
+                                      .Include(ur => ur.Role)
+                                      .ToListAsync();
+
+            return Ok(roles);
+        }
+
+        // POST: api/Users/5/Roles
+        [HttpPost("{id}/Roles")]
+        public async Task<IActionResult> AddUserRole(string id, UserRole userRole)
+        {
+            if (id != userRole.UserId)
+            {
+                _logger.LogWarning($"User ID mismatch: {id} != {userRole.UserId}");
+                return BadRequest();
+            }
+
+            _logger.LogInformation($"Adding role to user with ID: {id}");
+            _context.UserRoles.Add(userRole);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        // DELETE: api/Users/5/Roles/3
+        [HttpDelete("{id}/Roles/{roleId}")]
+        public async Task<IActionResult> RemoveUserRole(string id, int roleId)
+        {
+            _logger.LogInformation($"Removing role with ID: {roleId} from user with ID: {id}");
+            var userRole = await _context.UserRoles
+                                         .FirstOrDefaultAsync(ur => ur.UserId == id && ur.RoleId == roleId);
+
+            if (userRole == null)
+            {
+                _logger.LogWarning($"Role with ID: {roleId} not found for user with ID: {id}");
+                return NotFound();
+            }
+
+            _context.UserRoles.Remove(userRole);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool UserExists(string id)
+        {
+            return _context.UserProfiles.Any(e => e.UserId == id);
         }
     }
 }

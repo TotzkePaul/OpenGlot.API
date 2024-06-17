@@ -1,74 +1,77 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PolyglotAPI.Models;
-using static PolyglotAPI.Models.Structure;
+using Microsoft.Extensions.Logging;
+using PolyglotAPI.Data.Models;
+using PolyglotAPI.Data.Repos;
 
-
-namespace PolyglotAPI.Controllers
+[Authorize]
+[Route("api/[controller]")]
+[ApiController]
+public class LessonsController : ControllerBase
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
-    public class LessonsController : ControllerBase
+    private readonly ILessonRepository _lessonRepository;
+    private readonly ILogger<LessonsController> _logger;
+
+    public LessonsController(ILessonRepository lessonRepository, ILogger<LessonsController> logger)
     {
-        private readonly ILogger<LessonsController> _logger;
+        _lessonRepository = lessonRepository;
+        _logger = logger;
+    }
 
-        private readonly List<Lesson> lessons = new List<Lesson>
-        {
-            new Lesson { Id = 1, Name = "Greetings" },
-            new Lesson { Id = 2, Name = "Numbers" },
-            new Lesson { Id = 3, Name = "Colors" },
-            new Lesson { Id = 4, Name = "Days of the Week" },
-            new Lesson { Id = 5, Name = "Months of the Year" },
-            new Lesson { Id = 6, Name = "Seasons" },
-            new Lesson { Id = 7, Name = "Weather" },
-            new Lesson { Id = 8, Name = "Directions" },
-            new Lesson { Id = 9, Name = "Time" },
-            new Lesson { Id = 10, Name = "Family" },
-            new Lesson { Id = 11, Name = "Body Parts" },
-            new Lesson { Id = 12, Name = "Clothing" },
-            new Lesson { Id = 13, Name = "Food" },
-            new Lesson { Id = 14, Name = "Animals" },
-            new Lesson { Id = 15, Name = "Jobs" },
-            new Lesson { Id = 16, Name = "Transportation" },
-            new Lesson { Id = 17, Name = "Hobbies" },
-            new Lesson { Id = 18, Name = "Sports" },
-            new Lesson { Id = 19, Name = "Music" },
-            new Lesson { Id = 20, Name = "Movies" },
-            new Lesson { Id = 21, Name = "Books" },
-            new Lesson { Id = 22, Name = "Technology" },
-            new Lesson { Id = 23, Name = "Travel" },
-            new Lesson { Id = 24, Name = "Shopping" },
-            new Lesson { Id = 25, Name = "Health" },
-            new Lesson { Id = 26, Name = "Emergencies" },
-            new Lesson { Id = 27, Name = "School" },
-            new Lesson { Id = 28, Name = "Work" },
-            new Lesson { Id = 29, Name = "Home" },
-            new Lesson { Id = 30, Name = "Nature" },
-            new Lesson { Id = 31, Name = "Environment" },
-            new Lesson { Id = 32, Name = "Culture" }
-        };
+    // GET: api/Lessons
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Lesson>>> GetLessons()
+    {
+        _logger.LogInformation("Getting all lessons");
+        var lessons = await _lessonRepository.GetAllAsync();
+        return Ok(lessons);
+    }
 
-        public LessonsController(ILogger<LessonsController> logger)
+    // GET: api/Lessons/5
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Lesson>> GetLesson(int id)
+    {
+        _logger.LogInformation($"Getting lesson with ID: {id}");
+        var lesson = await _lessonRepository.GetByIdAsync(id);
+        if (lesson == null)
         {
-            _logger = logger;
+            _logger.LogWarning($"Lesson with ID: {id} not found");
+            return NotFound();
         }
+        return Ok(lesson);
+    }
 
-        // Write mock endpoints and fields that handles multiple lessons
+    // POST: api/Lessons
+    [HttpPost]
+    public async Task<ActionResult<Lesson>> AddLesson(Lesson lesson)
+    {
+        _logger.LogInformation("Adding a new lesson");
+        await _lessonRepository.AddAsync(lesson);
+        return CreatedAtAction(nameof(GetLesson), new { id = lesson.Id }, lesson);
+    }
 
-        [HttpGet]
-        
-        public ActionResult<IEnumerable<Lesson>> GetLessons()
+    // PUT: api/Lessons/5
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateLesson(int id, Lesson lesson)
+    {
+        if (id != lesson.Id)
         {
-            return Ok(lessons);
+            _logger.LogWarning($"Lesson ID mismatch: {id} != {lesson.Id}");
+            return BadRequest();
         }
+        _logger.LogInformation($"Updating lesson with ID: {id}");
+        await _lessonRepository.UpdateAsync(lesson);
+        return NoContent();
+    }
 
-        [HttpGet]
-        [Route("{id}")]
-        public ActionResult<IEnumerable<Lesson>> GetLessonsByLanguage(int id)
-        {
-            return Ok(lessons.Where(x => x.Id == id));
-        }
-
+    // DELETE: api/Lessons/5
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteLesson(int id)
+    {
+        _logger.LogInformation($"Deleting lesson with ID: {id}");
+        await _lessonRepository.DeleteAsync(id);
+        return NoContent();
     }
 }

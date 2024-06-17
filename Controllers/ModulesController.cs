@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PolyglotAPI.Data;
-using static PolyglotAPI.Models.Structure;
+using PolyglotAPI.Data.Models;
+using PolyglotAPI.Data.Repos;
+
 
 namespace PolyglotAPI.Controllers
 {
@@ -22,7 +23,8 @@ namespace PolyglotAPI.Controllers
         public ActionResult<IEnumerable<Module>> GetModules()
         {
             _logger.LogInformation("Getting all modules");
-            return Ok(_moduleRepository.GetAll());
+            var modules = _moduleRepository.GetAllAsync();
+            return Ok(modules);
         }
 
         // GET: api/Modules/5
@@ -30,7 +32,7 @@ namespace PolyglotAPI.Controllers
         public ActionResult<Module> GetModule(int id)
         {
             _logger.LogInformation($"Getting module with ID: {id}");
-            var module = _moduleRepository.GetById(id);
+            var module = _moduleRepository.GetByIdAsync(id);
             if (module == null)
             {
                 _logger.LogWarning($"Module with ID: {id} not found");
@@ -44,7 +46,7 @@ namespace PolyglotAPI.Controllers
         public ActionResult<Module> AddModule(Module module)
         {
             _logger.LogInformation("Adding a new module");
-            _moduleRepository.Add(module);
+            _moduleRepository.AddAsync(module);
             return CreatedAtAction(nameof(GetModule), new { id = module.Id }, module);
         }
 
@@ -58,7 +60,7 @@ namespace PolyglotAPI.Controllers
                 return BadRequest();
             }
             _logger.LogInformation($"Updating module with ID: {id}");
-            _moduleRepository.Update(module);
+            _moduleRepository.UpdateAsync(module);
             return NoContent();
         }
 
@@ -67,7 +69,7 @@ namespace PolyglotAPI.Controllers
         public IActionResult DeleteModule(int id)
         {
             _logger.LogInformation($"Deleting module with ID: {id}");
-            _moduleRepository.Delete(id);
+            _moduleRepository.DeleteAsync(id);
             return NoContent();
         }
     }

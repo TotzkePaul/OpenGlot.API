@@ -7,8 +7,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PolyglotAPI.Configs;
 using PolyglotAPI.Data;
+using PolyglotAPI.Data.Repos;
 using PolyglotAPI.Health;
 using System.Configuration;
+using System.Text.Json.Serialization;
 
 public class Startup
 {
@@ -24,7 +26,11 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         // Add services to the container
-        services.AddControllers();
+        services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            });
 
         services.AddHealthChecks()
             .AddCheck<CustomHealthCheck>("Custom Check");
@@ -110,14 +116,15 @@ public class Startup
         Console.WriteLine("Connection String: " + connectionString);
 
         services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+                    options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"))
+                    //.UseLazyLoadingProxies()
+                    );
 
-        services.AddDbContext<UserProfileContext>(options =>
-                    options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
-
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ILanguageRepository, LanguageRepository>();
         services.AddScoped<ICourseRepository, CourseRepository>();
         services.AddScoped<IModuleRepository, ModuleRepository>();
+        services.AddScoped<ILessonRepository, LessonRepository>();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

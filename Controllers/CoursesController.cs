@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PolyglotAPI.Data;
-using static PolyglotAPI.Models.Structure;
+using PolyglotAPI.Data.Models;
+using PolyglotAPI.Data.Repos;
+
 
 namespace PolyglotAPI.Controllers
 {
@@ -19,10 +20,11 @@ namespace PolyglotAPI.Controllers
 
         // GET: api/Courses
         [HttpGet]
-        public ActionResult<IEnumerable<Course>> GetCourses()
+        public async Task<ActionResult<IEnumerable<Course>>> GetCourses()
         {
             _logger.LogInformation("Getting all courses");
-            return Ok(_courseRepository.GetAll());
+            var courses = await _courseRepository.GetAllAsync();
+            return Ok(courses);
         }
 
         // GET: api/Courses/5
@@ -30,7 +32,7 @@ namespace PolyglotAPI.Controllers
         public ActionResult<Course> GetCourse(int id)
         {
             _logger.LogInformation($"Getting course with ID: {id}");
-            var course = _courseRepository.GetById(id);
+            var course = _courseRepository.GetByIdAsync(id);
             if (course == null)
             {
                 _logger.LogWarning($"Course with ID: {id} not found");
@@ -44,7 +46,7 @@ namespace PolyglotAPI.Controllers
         public ActionResult<Course> AddCourse(Course course)
         {
             _logger.LogInformation("Adding a new course");
-            _courseRepository.Add(course);
+            _courseRepository.AddAsync(course);
             return CreatedAtAction(nameof(GetCourse), new { id = course.Id }, course);
         }
 
@@ -58,7 +60,7 @@ namespace PolyglotAPI.Controllers
                 return BadRequest();
             }
             _logger.LogInformation($"Updating course with ID: {id}");
-            _courseRepository.Update(course);
+            _courseRepository.UpdateAsync(course);
             return NoContent();
         }
 
@@ -67,7 +69,7 @@ namespace PolyglotAPI.Controllers
         public IActionResult DeleteCourse(int id)
         {
             _logger.LogInformation($"Deleting course with ID: {id}");
-            _courseRepository.Delete(id);
+            _courseRepository.DeleteAsync(id);
             return NoContent();
         }
     }

@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PolyglotAPI.Data;
-using static PolyglotAPI.Models.Structure;
+using PolyglotAPI.Data.Models;
+using PolyglotAPI.Data.Repos;
+
 
 namespace PolyglotAPI.Controllers
 {
@@ -20,10 +21,11 @@ namespace PolyglotAPI.Controllers
 
         // GET: api/Languages
         [HttpGet]
-        public ActionResult<IEnumerable<Language>> GetLanguages()
+        public async Task<ActionResult<IEnumerable<Language>>> GetLanguages()
         {
             _logger.LogInformation("Getting all languages");
-            return Ok(_languageRepository.GetAll());
+            var languages = await _languageRepository.GetAllAsync();
+            return Ok(languages);
         }
 
         // GET: api/Languages/5
@@ -31,7 +33,7 @@ namespace PolyglotAPI.Controllers
         public ActionResult<Language> GetLanguage(int id)
         {
             _logger.LogInformation($"Getting language with ID: {id}");
-            var language = _languageRepository.GetById(id);
+            var language = _languageRepository.GetByIdAsync(id);
             if (language == null)
             {
                 _logger.LogWarning($"Language with ID: {id} not found");
@@ -45,7 +47,7 @@ namespace PolyglotAPI.Controllers
         public ActionResult<Language> AddLanguage(Language language)
         {
             _logger.LogInformation("Adding a new language");
-            _languageRepository.Add(language);
+            _languageRepository.AddAsync(language);
             return CreatedAtAction(nameof(GetLanguage), new { id = language.Id }, language);
         }
 
@@ -59,7 +61,7 @@ namespace PolyglotAPI.Controllers
                 return BadRequest();
             }
             _logger.LogInformation($"Updating language with ID: {id}");
-            _languageRepository.Update(language);
+            _languageRepository.UpdateAsync(language);
             return NoContent();
         }
 
@@ -68,7 +70,7 @@ namespace PolyglotAPI.Controllers
         public IActionResult DeleteLanguage(int id)
         {
             _logger.LogInformation($"Deleting language with ID: {id}");
-            _languageRepository.Delete(id);
+            _languageRepository.DeleteAsync(id);
             return NoContent();
         }
     }
