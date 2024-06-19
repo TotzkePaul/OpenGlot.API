@@ -19,6 +19,12 @@ namespace PolyglotAPI.Data.Repos
         Task<IEnumerable<UserRole>> GetUserRolesAsync(string userId);
         Task AddUserRoleAsync(UserRole userRole);
         Task RemoveUserRoleAsync(string userId, int roleId);
+
+        Task<UserProfile?> GetUserProfileAsync(string userId);
+        Task<IEnumerable<Badge>> GetUserBadgesAsync(string userId);
+        Task<IEnumerable<Notification>> GetUserNotificationsAsync(string userId);
+        Task<IEnumerable<Flashcard>> GetUserFlashcardsAsync(string userId);
+        Task<IEnumerable<Progress>> GetUserProgressesAsync(string userId);
     }
 
 
@@ -37,7 +43,7 @@ public class UserRepository : IUserRepository
             return await _context.UserProfiles.ToListAsync();
         }
 
-        public async Task<UserProfile> GetUserByIdAsync(string userId)
+        public async Task<UserProfile?> GetUserByIdAsync(string userId)
         {
             return await _context.UserProfiles
                                  .Include(u => u.UserRoles)
@@ -90,6 +96,36 @@ public class UserRepository : IUserRepository
                 _context.UserRoles.Remove(userRole);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<UserProfile?> GetUserProfileAsync(string userId)
+        {
+            return await _context.UserProfiles
+                                 .Include(u => u.Badges)
+                                 .Include(u => u.Notifications)
+                                 .Include(u => u.Flashcards)
+                                 .Include(u => u.Progresses)
+                                 .FirstOrDefaultAsync(u => u.UserId == userId);
+        }
+
+        public async Task<IEnumerable<Badge>> GetUserBadgesAsync(string userId)
+        {
+            return await _context.Badges.Where(b => b.UserId == userId).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Notification>> GetUserNotificationsAsync(string userId)
+        {
+            return await _context.Notifications.Where(n => n.UserId == userId).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Flashcard>> GetUserFlashcardsAsync(string userId)
+        {
+            return await _context.Flashcards.Where(f => f.UserId == userId).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Progress>> GetUserProgressesAsync(string userId)
+        {
+            return await _context.Progresses.Where(p => p.UserId == userId).ToListAsync();
         }
     }
 

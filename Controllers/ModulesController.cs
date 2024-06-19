@@ -20,10 +20,10 @@ namespace PolyglotAPI.Controllers
 
         // GET: api/Modules
         [HttpGet]
-        public ActionResult<IEnumerable<Module>> GetModules()
+        public async Task<ActionResult<IEnumerable<Module>>> GetModules()
         {
             _logger.LogInformation("Getting all modules");
-            var modules = _moduleRepository.GetAllAsync();
+            var modules = await _moduleRepository.GetAllAsync();
             return Ok(modules);
         }
 

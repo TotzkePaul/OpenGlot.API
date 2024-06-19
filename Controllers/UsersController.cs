@@ -11,17 +11,18 @@ namespace PolyglotAPI.Controllers
     using Microsoft.Extensions.Logging;
     using Microsoft.EntityFrameworkCore;
     using PolyglotAPI.Data.Models;
+    using PolyglotAPI.Data.Repos;
 
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUserRepository _userRepository;
         private readonly ILogger<UsersController> _logger;
 
-        public UsersController(ApplicationDbContext context, ILogger<UsersController> logger)
+        public UsersController(IUserRepository userRepository, ILogger<UsersController> logger)
         {
-            _context = context;
+            _userRepository = userRepository;
             _logger = logger;
         }
 
@@ -30,7 +31,7 @@ namespace PolyglotAPI.Controllers
         public async Task<ActionResult<IEnumerable<UserProfile>>> GetUsers()
         {
             _logger.LogInformation("Getting all users");
-            var users = await _context.UserProfiles.ToListAsync();
+            var users = await _userRepository.GetAllUsersAsync();
             return Ok(users);
         }
 
@@ -39,10 +40,7 @@ namespace PolyglotAPI.Controllers
         public async Task<ActionResult<UserProfile>> GetUser(string id)
         {
             _logger.LogInformation($"Getting user with ID: {id}");
-            var user = await _context.UserProfiles
-                                     .Include(u => u.UserRoles)
-                                     .ThenInclude(ur => ur.Role)
-                                     .FirstOrDefaultAsync(u => u.UserId == id);
+            var user = await _userRepository.GetUserByIdAsync(id);
 
             if (user == null)
             {
@@ -57,8 +55,7 @@ namespace PolyglotAPI.Controllers
         public async Task<ActionResult<UserProfile>> AddUser(UserProfile user)
         {
             _logger.LogInformation("Adding a new user");
-            _context.UserProfiles.Add(user);
-            await _context.SaveChangesAsync();
+            await _userRepository.AddUserAsync(user);
             return CreatedAtAction(nameof(GetUser), new { id = user.UserId }, user);
         }
 
@@ -90,15 +87,15 @@ namespace PolyglotAPI.Controllers
             }
 
             _logger.LogInformation($"Updating user with ID: {id}");
-            _context.Entry(user).State = EntityState.Modified;
+           
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _userRepository.UpdateUserAsync(user);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserExists(id))
+                if (! (await _userRepository.GetUserByIdAsync(id) != null))
                 {
                     _logger.LogWarning($"User with ID: {id} not found");
                     return NotFound();
@@ -117,15 +114,14 @@ namespace PolyglotAPI.Controllers
         public async Task<IActionResult> DeleteUser(string id)
         {
             _logger.LogInformation($"Deleting user with ID: {id}");
-            var user = await _context.UserProfiles.FindAsync(id);
+            var user = await _userRepository.GetUserByIdAsync(id);
             if (user == null)
             {
                 _logger.LogWarning($"User with ID: {id} not found");
                 return NotFound();
             }
 
-            _context.UserProfiles.Remove(user);
-            await _context.SaveChangesAsync();
+            await _userRepository.DeleteUserAsync(id);
 
             return NoContent();
         }
@@ -135,10 +131,7 @@ namespace PolyglotAPI.Controllers
         public async Task<ActionResult<IEnumerable<UserRole>>> GetUserRoles(string id)
         {
             _logger.LogInformation($"Getting roles for user with ID: {id}");
-            var roles = await _context.UserRoles
-                                      .Where(ur => ur.UserId == id)
-                                      .Include(ur => ur.Role)
-                                      .ToListAsync();
+            var roles = await _userRepository.GetUserRolesAsync(id);
 
             return Ok(roles);
         }
@@ -154,8 +147,7 @@ namespace PolyglotAPI.Controllers
             }
 
             _logger.LogInformation($"Adding role to user with ID: {id}");
-            _context.UserRoles.Add(userRole);
-            await _context.SaveChangesAsync();
+            _userRepository.AddUserRoleAsync(userRole);
 
             return NoContent();
         }
@@ -165,24 +157,58 @@ namespace PolyglotAPI.Controllers
         public async Task<IActionResult> RemoveUserRole(string id, int roleId)
         {
             _logger.LogInformation($"Removing role with ID: {roleId} from user with ID: {id}");
-            var userRole = await _context.UserRoles
-                                         .FirstOrDefaultAsync(ur => ur.UserId == id && ur.RoleId == roleId);
-
-            if (userRole == null)
-            {
-                _logger.LogWarning($"Role with ID: {roleId} not found for user with ID: {id}");
-                return NotFound();
-            }
-
-            _context.UserRoles.Remove(userRole);
-            await _context.SaveChangesAsync();
-
+            var userRole = _userRepository.RemoveUserRoleAsync(id, roleId);
+                        
             return NoContent();
         }
 
-        private bool UserExists(string id)
+        // GET: api/Users/{id}/Profile
+        [HttpGet("{id}/Profile")]
+        public async Task<ActionResult<UserProfile>> GetUserProfile(string id)
         {
-            return _context.UserProfiles.Any(e => e.UserId == id);
+            _logger.LogInformation($"Getting profile for user with ID: {id}");
+            var userProfile = await _userRepository.GetUserProfileAsync(id);
+            if (userProfile == null)
+            {
+                return NotFound();
+            }
+            return Ok(userProfile);
+        }
+
+        // GET: api/Users/{id}/Badges
+        [HttpGet("{id}/Badges")]
+        public async Task<ActionResult<IEnumerable<Badge>>> GetUserBadges(string id)
+        {
+            _logger.LogInformation($"Getting badges for user with ID: {id}");
+            var badges = await _userRepository.GetUserBadgesAsync(id);
+            return Ok(badges);
+        }
+
+        // GET: api/Users/{id}/Notifications
+        [HttpGet("{id}/Notifications")]
+        public async Task<ActionResult<IEnumerable<Notification>>> GetUserNotifications(string id)
+        {
+            _logger.LogInformation($"Getting notifications for user with ID: {id}");
+            var notifications = await _userRepository.GetUserNotificationsAsync(id);
+            return Ok(notifications);
+        }
+
+        // GET: api/Users/{id}/Flashcards
+        [HttpGet("{id}/Flashcards")]
+        public async Task<ActionResult<IEnumerable<Flashcard>>> GetUserFlashcards(string id)
+        {
+            _logger.LogInformation($"Getting flashcards for user with ID: {id}");
+            var flashcards = await _userRepository.GetUserFlashcardsAsync(id);
+            return Ok(flashcards);
+        }
+
+        // GET: api/Users/{id}/Progresses
+        [HttpGet("{id}/Progresses")]
+        public async Task<ActionResult<IEnumerable<Progress>>> GetUserProgresses(string id)
+        {
+            _logger.LogInformation($"Getting progresses for user with ID: {id}");
+            var progresses = await _userRepository.GetUserProgressesAsync(id);
+            return Ok(progresses);
         }
     }
 }
