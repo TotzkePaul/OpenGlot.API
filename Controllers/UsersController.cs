@@ -12,6 +12,7 @@ namespace PolyglotAPI.Controllers
     using Microsoft.EntityFrameworkCore;
     using PolyglotAPI.Data.Models;
     using PolyglotAPI.Data.Repos;
+    using PolyglotAPI.Common;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -37,7 +38,7 @@ namespace PolyglotAPI.Controllers
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserProfile>> GetUser(string id)
+        public async Task<ActionResult<UserProfile>> GetUser(Guid id)
         {
             _logger.LogInformation($"Getting user with ID: {id}");
             var user = await _userRepository.GetUserByIdAsync(id);
@@ -60,7 +61,7 @@ namespace PolyglotAPI.Controllers
         }
 
         [HttpPost("{id}")]
-        public async Task<IActionResult> UpdateUser(string id, UserProfile user)
+        public async Task<IActionResult> UpdateUser(Guid id, UserProfile user)
         {
             if (id != user.UserId)
             {
@@ -74,7 +75,7 @@ namespace PolyglotAPI.Controllers
                 return BadRequest("User must be 18 years or older");
             }
             // Check if user is updating their own profile
-            if (user.UserId != User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value)
+            if (user.UserId != User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).ToGuid())
             {
                 return Unauthorized();
             }
@@ -111,7 +112,7 @@ namespace PolyglotAPI.Controllers
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<IActionResult> DeleteUser(Guid id)
         {
             _logger.LogInformation($"Deleting user with ID: {id}");
             var user = await _userRepository.GetUserByIdAsync(id);
@@ -126,45 +127,29 @@ namespace PolyglotAPI.Controllers
             return NoContent();
         }
 
-        // GET: api/Users/5/Roles
-        [HttpGet("{id}/Roles")]
-        public async Task<ActionResult<IEnumerable<UserRole>>> GetUserRoles(string id)
-        {
-            _logger.LogInformation($"Getting roles for user with ID: {id}");
-            var roles = await _userRepository.GetUserRolesAsync(id);
-
-            return Ok(roles);
-        }
+        
 
         // POST: api/Users/5/Roles
         [HttpPost("{id}/Roles")]
-        public async Task<IActionResult> AddUserRole(string id, UserRole userRole)
+        public async Task<IActionResult> UpdateUserRole(Guid id, UserRole userRole)
         {
-            if (id != userRole.UserId)
+            var user = await _userRepository.GetUserByIdAsync(id);
+
+            if (user == null)
             {
-                _logger.LogWarning($"User ID mismatch: {id} != {userRole.UserId}");
-                return BadRequest();
+                return NotFound();
             }
 
-            _logger.LogInformation($"Adding role to user with ID: {id}");
-            _userRepository.AddUserRoleAsync(userRole);
+            user.UserRole = userRole;
 
-            return NoContent();
-        }
+            await _userRepository.UpdateUserAsync(user);
 
-        // DELETE: api/Users/5/Roles/3
-        [HttpDelete("{id}/Roles/{roleId}")]
-        public async Task<IActionResult> RemoveUserRole(string id, int roleId)
-        {
-            _logger.LogInformation($"Removing role with ID: {roleId} from user with ID: {id}");
-            var userRole = _userRepository.RemoveUserRoleAsync(id, roleId);
-                        
             return NoContent();
         }
 
         // GET: api/Users/{id}/Profile
         [HttpGet("{id}/Profile")]
-        public async Task<ActionResult<UserProfile>> GetUserProfile(string id)
+        public async Task<ActionResult<UserProfile>> GetUserProfile(Guid id)
         {
             _logger.LogInformation($"Getting profile for user with ID: {id}");
             var userProfile = await _userRepository.GetUserProfileAsync(id);
@@ -177,7 +162,7 @@ namespace PolyglotAPI.Controllers
 
         // GET: api/Users/{id}/Badges
         [HttpGet("{id}/Badges")]
-        public async Task<ActionResult<IEnumerable<Badge>>> GetUserBadges(string id)
+        public async Task<ActionResult<IEnumerable<Badge>>> GetUserBadges(Guid id)
         {
             _logger.LogInformation($"Getting badges for user with ID: {id}");
             var badges = await _userRepository.GetUserBadgesAsync(id);
@@ -186,7 +171,7 @@ namespace PolyglotAPI.Controllers
 
         // GET: api/Users/{id}/Notifications
         [HttpGet("{id}/Notifications")]
-        public async Task<ActionResult<IEnumerable<Notification>>> GetUserNotifications(string id)
+        public async Task<ActionResult<IEnumerable<Notification>>> GetUserNotifications(Guid id)
         {
             _logger.LogInformation($"Getting notifications for user with ID: {id}");
             var notifications = await _userRepository.GetUserNotificationsAsync(id);
@@ -195,7 +180,7 @@ namespace PolyglotAPI.Controllers
 
         // GET: api/Users/{id}/Flashcards
         [HttpGet("{id}/Flashcards")]
-        public async Task<ActionResult<IEnumerable<Flashcard>>> GetUserFlashcards(string id)
+        public async Task<ActionResult<IEnumerable<Flashcard>>> GetUserFlashcards(Guid id)
         {
             _logger.LogInformation($"Getting flashcards for user with ID: {id}");
             var flashcards = await _userRepository.GetUserFlashcardsAsync(id);
@@ -204,7 +189,7 @@ namespace PolyglotAPI.Controllers
 
         // GET: api/Users/{id}/Progresses
         [HttpGet("{id}/Progresses")]
-        public async Task<ActionResult<IEnumerable<Progress>>> GetUserProgresses(string id)
+        public async Task<ActionResult<IEnumerable<Progress>>> GetUserProgresses(Guid id)
         {
             _logger.LogInformation($"Getting progresses for user with ID: {id}");
             var progresses = await _userRepository.GetUserProgressesAsync(id);

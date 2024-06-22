@@ -9,6 +9,7 @@ namespace PolyglotAPI.Data.Models
         [Key]
         public int Id { get; set; }
         public string Name { get; set; }
+        public string Code { get; set; }
         public string Description { get; set; }
 
         public virtual ICollection<Course> Courses { get; set; }
@@ -19,6 +20,7 @@ namespace PolyglotAPI.Data.Models
         [Key]
         public int Id { get; set; }
         public string Title { get; set; }
+        public string Description { get; set; }
 
         [ForeignKey(nameof(Language))]
         public int LanguageId { get; set; }
@@ -32,6 +34,7 @@ namespace PolyglotAPI.Data.Models
         [Key]
         public int Id { get; set; }
         public string Title { get; set; }
+        public string Description { get; set; }
 
         [ForeignKey(nameof(Course))]
         public int CourseId { get; set; }
@@ -128,7 +131,7 @@ namespace PolyglotAPI.Data.Models
         public int RatingId { get; set; }
 
         [ForeignKey(nameof(UserProfile))]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
         public UserProfile User { get; set; }
 
         public ContentType ContentType { get; set; }
@@ -148,7 +151,7 @@ namespace PolyglotAPI.Data.Models
         public int ProgressId { get; set; }
 
         [ForeignKey(nameof(UserProfile))]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
         public UserProfile User { get; set; }
 
         [ForeignKey(nameof(Course))]
@@ -177,7 +180,7 @@ namespace PolyglotAPI.Data.Models
         public int SubscriptionId { get; set; }
 
         [ForeignKey(nameof(UserProfile))]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
         public UserProfile User { get; set; }
 
         public SubscriptionPlan PlanName { get; set; }
@@ -215,7 +218,7 @@ namespace PolyglotAPI.Data.Models
         public int BadgeId { get; set; }
 
         [ForeignKey(nameof(UserProfile))]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
         public UserProfile User { get; set; }
 
         public string BadgeName { get; set; }
@@ -225,10 +228,10 @@ namespace PolyglotAPI.Data.Models
     public class Notification
     {
         [Key]
-        public int NotificationId { get; set; }
+        public Guid NotificationId { get; set; }
 
         [ForeignKey(nameof(UserProfile))]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
         public UserProfile User { get; set; }
 
         public string Message { get; set; }
@@ -242,7 +245,7 @@ namespace PolyglotAPI.Data.Models
         public int FlashcardId { get; set; }
 
         [ForeignKey(nameof(UserProfile))]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
         public UserProfile User { get; set; }
 
         public string Front { get; set; }
@@ -253,10 +256,10 @@ namespace PolyglotAPI.Data.Models
     public class UserGeneratedContent
     {
         [Key]
-        public int ContentId { get; set; }
+        public Guid ContentId { get; set; }
 
         [ForeignKey(nameof(UserProfile))]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
         public UserProfile User { get; set; }
 
         public string Title { get; set; }

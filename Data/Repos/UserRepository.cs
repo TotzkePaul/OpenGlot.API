@@ -11,27 +11,23 @@ namespace PolyglotAPI.Data.Repos
     public interface IUserRepository
     {
         Task<IEnumerable<UserProfile>> GetAllUsersAsync();
-        Task<UserProfile> GetUserByIdAsync(string userId);
+        Task<UserProfile> GetUserByIdAsync(Guid userId);
         Task AddUserAsync(UserProfile user);
         Task UpdateUserAsync(UserProfile user);
-        Task DeleteUserAsync(string userId);
+        Task DeleteUserAsync(Guid userId);
 
-        Task<IEnumerable<UserRole>> GetUserRolesAsync(string userId);
-        Task AddUserRoleAsync(UserRole userRole);
-        Task RemoveUserRoleAsync(string userId, int roleId);
-
-        Task<UserProfile?> GetUserProfileAsync(string userId);
-        Task<IEnumerable<Badge>> GetUserBadgesAsync(string userId);
-        Task<IEnumerable<Notification>> GetUserNotificationsAsync(string userId);
-        Task<IEnumerable<Flashcard>> GetUserFlashcardsAsync(string userId);
-        Task<IEnumerable<Progress>> GetUserProgressesAsync(string userId);
+        Task<UserProfile?> GetUserProfileAsync(Guid userId);
+        Task<IEnumerable<Badge>> GetUserBadgesAsync(Guid userId);
+        Task<IEnumerable<Notification>> GetUserNotificationsAsync(Guid userId);
+        Task<IEnumerable<Flashcard>> GetUserFlashcardsAsync(Guid userId);
+        Task<IEnumerable<Progress>> GetUserProgressesAsync(Guid userId);
 
         Task AddBadgeAsync(Badge badge);
         Task AddNotificationAsync(Notification notification);
         Task AddFlashcardAsync(Flashcard flashcard);
         Task AddProgressAsync(Progress progress);
 
-        Task<UserProfile?> GetDetailedUserProfileAsync(string userId);
+        Task<UserProfile?> GetDetailedUserProfileAsync(Guid userId);
     }
 
 
@@ -50,11 +46,10 @@ public class UserRepository : IUserRepository
             return await _context.UserProfiles.ToListAsync();
         }
 
-        public async Task<UserProfile?> GetUserByIdAsync(string userId)
+        public async Task<UserProfile?> GetUserByIdAsync(Guid userId)
         {
             return await _context.UserProfiles
                                  .Include(u => u.UserRoles)
-                                 .ThenInclude(ur => ur.Role)
                                  .FirstOrDefaultAsync(u => u.UserId == userId);
         }
 
@@ -70,7 +65,7 @@ public class UserRepository : IUserRepository
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteUserAsync(string userId)
+        public async Task DeleteUserAsync(Guid userId)
         {
             var user = await _context.UserProfiles.FindAsync(userId);
             if (user != null)
@@ -80,32 +75,7 @@ public class UserRepository : IUserRepository
             }
         }
 
-        public async Task<IEnumerable<UserRole>> GetUserRolesAsync(string userId)
-        {
-            return await _context.UserRoles
-                                 .Where(ur => ur.UserId == userId)
-                                 .Include(ur => ur.Role)
-                                 .ToListAsync();
-        }
-
-        public async Task AddUserRoleAsync(UserRole userRole)
-        {
-            await _context.UserRoles.AddAsync(userRole);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task RemoveUserRoleAsync(string userId, int roleId)
-        {
-            var userRole = await _context.UserRoles
-                                         .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
-            if (userRole != null)
-            {
-                _context.UserRoles.Remove(userRole);
-                await _context.SaveChangesAsync();
-            }
-        }
-
-        public async Task<UserProfile?> GetUserProfileAsync(string userId)
+        public async Task<UserProfile?> GetUserProfileAsync(Guid userId)
         {
             return await _context.UserProfiles
                                  .Include(u => u.Badges)
@@ -115,22 +85,22 @@ public class UserRepository : IUserRepository
                                  .FirstOrDefaultAsync(u => u.UserId == userId);
         }
 
-        public async Task<IEnumerable<Badge>> GetUserBadgesAsync(string userId)
+        public async Task<IEnumerable<Badge>> GetUserBadgesAsync(Guid userId)
         {
             return await _context.Badges.Where(b => b.UserId == userId).ToListAsync();
         }
 
-        public async Task<IEnumerable<Notification>> GetUserNotificationsAsync(string userId)
+        public async Task<IEnumerable<Notification>> GetUserNotificationsAsync(Guid userId)
         {
             return await _context.Notifications.Where(n => n.UserId == userId).ToListAsync();
         }
 
-        public async Task<IEnumerable<Flashcard>> GetUserFlashcardsAsync(string userId)
+        public async Task<IEnumerable<Flashcard>> GetUserFlashcardsAsync(Guid userId)
         {
             return await _context.Flashcards.Where(f => f.UserId == userId).ToListAsync();
         }
 
-        public async Task<IEnumerable<Progress>> GetUserProgressesAsync(string userId)
+        public async Task<IEnumerable<Progress>> GetUserProgressesAsync(Guid userId)
         {
             return await _context.Progresses.Where(p => p.UserId == userId).ToListAsync();
         }
@@ -160,14 +130,13 @@ public class UserRepository : IUserRepository
         }
 
         // Detailed User Profile
-        public async Task<UserProfile?> GetDetailedUserProfileAsync(string userId)
+        public async Task<UserProfile?> GetDetailedUserProfileAsync(Guid userId)
         {
             return await _context.UserProfiles
                                  .Include(u => u.Badges)
                                  .Include(u => u.Notifications)
                                  .Include(u => u.Flashcards)
                                  .Include(u => u.Progresses)
-                                 .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
                                  .FirstOrDefaultAsync(u => u.UserId == userId);
         }
     }

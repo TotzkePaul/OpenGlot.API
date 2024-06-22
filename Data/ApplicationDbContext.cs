@@ -16,7 +16,6 @@ namespace PolyglotAPI.Data
         public DbSet<Image> Images { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<Role> Roles { get; set; }
-        public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<Rating> Ratings { get; set; }
         public DbSet<Progress> Progresses { get; set; }
         public DbSet<Badge> Badges { get; set; }
@@ -37,10 +36,6 @@ namespace PolyglotAPI.Data
             modelBuilder.Entity<UserProfile>(entity =>
             {
                 entity.HasKey(e => e.UserId);
-
-                entity.HasMany(e => e.UserRoles)
-                      .WithOne(e => e.User)
-                      .HasForeignKey(e => e.UserId);
 
                 entity.HasMany(e => e.Ratings)
                       .WithOne(e => e.User)
@@ -71,20 +66,6 @@ namespace PolyglotAPI.Data
             modelBuilder.Entity<Role>(entity =>
             {
                 entity.HasKey(e => e.RoleId);
-            });
-
-            // UserRole configuration
-            modelBuilder.Entity<UserRole>(entity =>
-            {
-                entity.HasKey(e => e.UserRoleId);
-
-                entity.HasOne(e => e.User)
-                      .WithMany(e => e.UserRoles)
-                      .HasForeignKey(e => e.UserId);
-
-                entity.HasOne(e => e.Role)
-                      .WithMany()
-                      .HasForeignKey(e => e.RoleId);
             });
 
             // Rating configuration

@@ -10,7 +10,7 @@
     public class UserProfile
     {
         [Key]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
         public string Username { get; set; }
         public string Email { get; set; }
         public string NativeLanguage { get; set; }
@@ -22,6 +22,7 @@
         public string? TargetLanguageLevel3 { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string TimeZone { get; set; }
+        public UserRole UserRole { get; set; }
 
         public ICollection<UserRole> UserRoles { get; set; }
         public ICollection<Rating> Ratings { get; set; }
@@ -40,16 +41,12 @@
         public string RoleName { get; set; }
     }
 
-    public class UserRole
+    public enum UserRole
     {
-        [Key]
-        public int UserRoleId { get; set; }
-        public string UserId { get; set; }
-        [ForeignKey(nameof(UserId))]
-        public UserProfile User { get; set; }
-        public int RoleId { get; set; }
-        [ForeignKey(nameof(RoleId))]
-        public Role Role { get; set; }
+        User,
+        Reviewer,
+        Creator,
+        Admin,
+        SuperAdmin
     }
-
 }
