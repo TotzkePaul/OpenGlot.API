@@ -76,8 +76,6 @@ public class Startup
         })
         .AddJwtBearer(options =>
         {
-            //var region = "us-east-1";
-            //var userPoolId = "us-east-1_sSfL2aipf";
             options.Authority = $"https://cognito-idp.{jwtBearerOptions.Region}.amazonaws.com/{jwtBearerOptions.UserPoolId}";
             options.Audience = jwtBearerOptions.Audience;
             var cache = services.BuildServiceProvider().GetRequiredService<IMemoryCache>();
@@ -117,7 +115,6 @@ public class Startup
 
         services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"))
-                    //.UseLazyLoadingProxies()
                     );
 
         services.AddScoped<IUserRepository, UserRepository>();
@@ -160,7 +157,7 @@ public class Startup
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
-            endpoints.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+            endpoints.MapHealthChecks("/api/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
             {
                 Predicate = (check) => true
             });

@@ -9,7 +9,7 @@ namespace PolyglotAPI.Data.Repos
     public interface ILanguageRepository
     {
         Task<IEnumerable<Language>> GetAllAsync();
-        Task<Language> GetByIdAsync(int id);
+        Task<Language?> GetByIdAsync(int id);
         Task AddAsync(Language language);
         Task UpdateAsync(Language language);
         Task DeleteAsync(int id);
@@ -30,7 +30,7 @@ namespace PolyglotAPI.Data.Repos
             return await _context.Languages.ToListAsync();
         }
 
-        public async Task<Language> GetByIdAsync(int id)
+        public async Task<Language?> GetByIdAsync(int id)
         {
             return await _context.Languages
                                  .Include(l => l.Courses)

@@ -25,6 +25,13 @@ namespace PolyglotAPI.Data.Repos
         Task<IEnumerable<Notification>> GetUserNotificationsAsync(string userId);
         Task<IEnumerable<Flashcard>> GetUserFlashcardsAsync(string userId);
         Task<IEnumerable<Progress>> GetUserProgressesAsync(string userId);
+
+        Task AddBadgeAsync(Badge badge);
+        Task AddNotificationAsync(Notification notification);
+        Task AddFlashcardAsync(Flashcard flashcard);
+        Task AddProgressAsync(Progress progress);
+
+        Task<UserProfile?> GetDetailedUserProfileAsync(string userId);
     }
 
 
@@ -126,6 +133,42 @@ public class UserRepository : IUserRepository
         public async Task<IEnumerable<Progress>> GetUserProgressesAsync(string userId)
         {
             return await _context.Progresses.Where(p => p.UserId == userId).ToListAsync();
+        }
+
+        public async Task AddBadgeAsync(Badge badge)
+        {
+            await _context.Badges.AddAsync(badge);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddNotificationAsync(Notification notification)
+        {
+            await _context.Notifications.AddAsync(notification);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddFlashcardAsync(Flashcard flashcard)
+        {
+            await _context.Flashcards.AddAsync(flashcard);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddProgressAsync(Progress progress)
+        {
+            await _context.Progresses.AddAsync(progress);
+            await _context.SaveChangesAsync();
+        }
+
+        // Detailed User Profile
+        public async Task<UserProfile?> GetDetailedUserProfileAsync(string userId)
+        {
+            return await _context.UserProfiles
+                                 .Include(u => u.Badges)
+                                 .Include(u => u.Notifications)
+                                 .Include(u => u.Flashcards)
+                                 .Include(u => u.Progresses)
+                                 .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
+                                 .FirstOrDefaultAsync(u => u.UserId == userId);
         }
     }
 

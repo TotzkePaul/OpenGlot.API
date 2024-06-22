@@ -6,7 +6,7 @@ namespace PolyglotAPI.Data.Repos
     public interface ILessonRepository
     {
         Task<IEnumerable<Lesson>> GetAllAsync();
-        Task<Lesson> GetByIdAsync(int id);
+        Task<Lesson?> GetByIdAsync(int id);
         Task AddAsync(Lesson lesson);
         Task UpdateAsync(Lesson lesson);
         Task DeleteAsync(int id);
@@ -26,7 +26,7 @@ namespace PolyglotAPI.Data.Repos
             return await _context.Lessons.ToListAsync();
         }
 
-        public async Task<Lesson> GetByIdAsync(int id)
+        public async Task<Lesson?> GetByIdAsync(int id)
         {
             return await _context.Lessons
                                  .Include(l => l.Questions)
