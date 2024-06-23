@@ -24,7 +24,6 @@
         public string TimeZone { get; set; }
         public UserRole UserRole { get; set; }
 
-        public ICollection<UserRole> UserRoles { get; set; }
         public ICollection<Rating> Ratings { get; set; }
         public ICollection<Progress> Progresses { get; set; }
         public ICollection<Badge> Badges { get; set; }

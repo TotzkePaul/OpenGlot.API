@@ -30,7 +30,15 @@ namespace PolyglotAPI.Data.Repos
         {
             return await _context.Lessons
                                  .Include(l => l.Questions)
-                                 .Include(l => l.Ratings)
+                                     .ThenInclude(q => q.Audio)
+                                 .Include(l => l.Questions)
+                                     .ThenInclude(q => q.Image)
+                                 .Include(l => l.Questions)
+                                     .ThenInclude(q => q.Options)
+                                        .ThenInclude(o => o.Audio)
+                                 .Include(l => l.Questions)
+                                     .ThenInclude(q => q.Options)
+                                        .ThenInclude(o => o.Image).Include(l => l.Questions)
                                  .FirstOrDefaultAsync(l => l.Id == id);
         }
 

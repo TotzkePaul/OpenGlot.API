@@ -1,5 +1,4 @@
-dotnet ef migrations add InitialCreate
-dotnet ef migrations script -o init.sql
+
 
 # Define source and destination paths
 $sourceFile = "init.sql"
@@ -16,6 +15,9 @@ if (Test-Path $migrationsFolder) {
     Write-Host "The $migrationsFolder folder does not exist."
 }
 
+dotnet ef migrations add InitialCreate
+dotnet ef migrations script -o init.sql
+
 # Create destination directory if it does not exist
 if (-not (Test-Path $destDir)) {
     New-Item -ItemType Directory -Path $destDir -Force
@@ -23,7 +25,7 @@ if (-not (Test-Path $destDir)) {
 
 # Move the init.sql file and overwrite if it exists
 if (Test-Path $sourceFile) {
-    Move-Item -Path $sourceFile -Destination $destFile -Force
+    Copy-Item -Path $sourceFile -Destination $destFile -Force
     Write-Host "Moved $sourceFile to $destFile and overwrote existing file."
 } else {
     Write-Host "Source file $sourceFile does not exist."

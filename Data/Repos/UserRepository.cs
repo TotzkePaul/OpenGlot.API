@@ -48,9 +48,7 @@ public class UserRepository : IUserRepository
 
         public async Task<UserProfile?> GetUserByIdAsync(Guid userId)
         {
-            return await _context.UserProfiles
-                                 .Include(u => u.UserRoles)
-                                 .FirstOrDefaultAsync(u => u.UserId == userId);
+            return await _context.UserProfiles.FirstOrDefaultAsync(u => u.UserId == userId);
         }
 
         public async Task AddUserAsync(UserProfile user)

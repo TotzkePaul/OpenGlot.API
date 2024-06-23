@@ -50,6 +50,7 @@ namespace PolyglotAPI.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -74,7 +75,7 @@ namespace PolyglotAPI.Migrations
                 name: "UserProfiles",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Username = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
                     NativeLanguage = table.Column<string>(type: "text", nullable: false),
@@ -85,7 +86,8 @@ namespace PolyglotAPI.Migrations
                     TargetLanguage3 = table.Column<string>(type: "text", nullable: true),
                     TargetLanguageLevel3 = table.Column<string>(type: "text", nullable: true),
                     DateOfBirth = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    TimeZone = table.Column<string>(type: "text", nullable: false)
+                    TimeZone = table.Column<string>(type: "text", nullable: false),
+                    UserRole = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -143,6 +145,7 @@ namespace PolyglotAPI.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
                     LanguageId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -162,7 +165,7 @@ namespace PolyglotAPI.Migrations
                 {
                     BadgeId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     BadgeName = table.Column<string>(type: "text", nullable: false),
                     AwardedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -183,7 +186,7 @@ namespace PolyglotAPI.Migrations
                 {
                     FlashcardId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Front = table.Column<string>(type: "text", nullable: false),
                     Back = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -203,9 +206,8 @@ namespace PolyglotAPI.Migrations
                 name: "Notifications",
                 columns: table => new
                 {
-                    NotificationId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<string>(type: "text", nullable: false),
+                    NotificationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Message = table.Column<string>(type: "text", nullable: false),
                     SentAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     IsRead = table.Column<bool>(type: "boolean", nullable: false)
@@ -227,7 +229,7 @@ namespace PolyglotAPI.Migrations
                 {
                     SubscriptionId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     PlanName = table.Column<int>(type: "integer", nullable: false),
                     StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -248,9 +250,8 @@ namespace PolyglotAPI.Migrations
                 name: "UserGeneratedContents",
                 columns: table => new
                 {
-                    ContentId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<string>(type: "text", nullable: false),
+                    ContentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
                     ContentType = table.Column<int>(type: "integer", nullable: false),
                     Content = table.Column<string>(type: "text", nullable: false),
@@ -268,38 +269,13 @@ namespace PolyglotAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserRoles",
-                columns: table => new
-                {
-                    UserRoleId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<string>(type: "text", nullable: false),
-                    RoleId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserRoles", x => x.UserRoleId);
-                    table.ForeignKey(
-                        name: "FK_UserRoles_Roles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "Roles",
-                        principalColumn: "RoleId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserRoles_UserProfiles_UserId",
-                        column: x => x.UserId,
-                        principalTable: "UserProfiles",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Modules",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
                     CourseId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -341,7 +317,7 @@ namespace PolyglotAPI.Migrations
                 {
                     ProgressId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     CourseId = table.Column<int>(type: "integer", nullable: true),
                     ModuleId = table.Column<int>(type: "integer", nullable: true),
                     CompletionPercentage = table.Column<int>(type: "integer", nullable: false),
@@ -408,7 +384,7 @@ namespace PolyglotAPI.Migrations
                 {
                     RatingId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     ContentType = table.Column<int>(type: "integer", nullable: false),
                     ContentId = table.Column<int>(type: "integer", nullable: false),
                     IsThumbsUp = table.Column<bool>(type: "boolean", nullable: false),
@@ -580,16 +556,6 @@ namespace PolyglotAPI.Migrations
                 name: "IX_UserGeneratedContents_UserId",
                 table: "UserGeneratedContents",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_RoleId",
-                table: "UserRoles",
-                column: "RoleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_UserId",
-                table: "UserRoles",
-                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -614,6 +580,9 @@ namespace PolyglotAPI.Migrations
                 name: "Ratings");
 
             migrationBuilder.DropTable(
+                name: "Roles");
+
+            migrationBuilder.DropTable(
                 name: "StoryChoices");
 
             migrationBuilder.DropTable(
@@ -623,16 +592,10 @@ namespace PolyglotAPI.Migrations
                 name: "UserGeneratedContents");
 
             migrationBuilder.DropTable(
-                name: "UserRoles");
-
-            migrationBuilder.DropTable(
                 name: "Questions");
 
             migrationBuilder.DropTable(
                 name: "InteractiveStorybooks");
-
-            migrationBuilder.DropTable(
-                name: "Roles");
 
             migrationBuilder.DropTable(
                 name: "UserProfiles");
