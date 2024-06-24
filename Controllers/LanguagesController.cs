@@ -6,6 +6,7 @@ using PolyglotAPI.Data.Repos;
 
 namespace PolyglotAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class LanguagesController : ControllerBase
@@ -72,6 +73,15 @@ namespace PolyglotAPI.Controllers
             _logger.LogInformation($"Deleting language with ID: {id}");
             _languageRepository.DeleteAsync(id);
             return NoContent();
+        }
+
+        // GET: api/Languages/5/Courses
+        [HttpGet("{id}/Courses")]
+        public async Task<ActionResult<IEnumerable<Course>>> GetCoursesForLanguage(int id)
+        {
+            _logger.LogInformation($"Getting all courses for language with ID: {id}");
+            var courses = await _languageRepository.GetCoursesByLanguageIdAsync(id);
+            return Ok(courses);
         }
     }
 

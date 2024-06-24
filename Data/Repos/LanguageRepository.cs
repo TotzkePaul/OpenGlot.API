@@ -13,6 +13,7 @@ namespace PolyglotAPI.Data.Repos
         Task AddAsync(Language language);
         Task UpdateAsync(Language language);
         Task DeleteAsync(int id);
+        Task<IEnumerable<Course>> GetCoursesByLanguageIdAsync(int languageId);
     }
 
 
@@ -57,6 +58,13 @@ namespace PolyglotAPI.Data.Repos
                 _context.Languages.Remove(language);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<IEnumerable<Course>> GetCoursesByLanguageIdAsync(int languageId)
+        {
+            return await _context.Courses
+                                 .Where(c => c.LanguageId == languageId)
+                                 .ToListAsync();
         }
     }
 

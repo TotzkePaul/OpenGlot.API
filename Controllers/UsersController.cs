@@ -1,19 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PolyglotAPI.Data;
+using Microsoft.EntityFrameworkCore;
+using PolyglotAPI.Data.Models;
+using PolyglotAPI.Data.Repos;
+using PolyglotAPI.Common;
 using System.Security.Claims;
 
 namespace PolyglotAPI.Controllers
 {
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.EntityFrameworkCore;
-    using PolyglotAPI.Data.Models;
-    using PolyglotAPI.Data.Repos;
-    using PolyglotAPI.Common;
 
+
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase

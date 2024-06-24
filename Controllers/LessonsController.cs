@@ -44,7 +44,7 @@ public class LessonsController : ControllerBase
     }
 
     // POST: api/Lessons
-    [HttpPost]
+    [HttpPut]
     public async Task<ActionResult<Lesson>> AddLesson(Lesson lesson)
     {
         _logger.LogInformation("Adding a new lesson");
@@ -53,7 +53,7 @@ public class LessonsController : ControllerBase
     }
 
     // PUT: api/Lessons/5
-    [HttpPut("{id}")]
+    [HttpPost("{id}")]
     public async Task<IActionResult> UpdateLesson(int id, Lesson lesson)
     {
         if (id != lesson.Id)

@@ -38,7 +38,7 @@ namespace PolyglotAPI.Data.Repos
                                         .ThenInclude(o => o.Audio)
                                  .Include(l => l.Questions)
                                      .ThenInclude(q => q.Options)
-                                        .ThenInclude(o => o.Image).Include(l => l.Questions)
+                                        .ThenInclude(o => o.Image)
                                  .FirstOrDefaultAsync(l => l.Id == id);
         }
 

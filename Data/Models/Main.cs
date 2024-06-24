@@ -12,7 +12,7 @@ namespace PolyglotAPI.Data.Models
         public string Code { get; set; }
         public string Description { get; set; }
 
-        public virtual ICollection<Course> Courses { get; set; }
+        public virtual ICollection<Course>? Courses { get; set; }
     }
 
     public class Course
@@ -24,9 +24,9 @@ namespace PolyglotAPI.Data.Models
 
         [ForeignKey(nameof(Language))]
         public int LanguageId { get; set; }
-        public virtual Language Language { get; set; }
+        public virtual Language? Language { get; set; }
 
-        public virtual ICollection<Module> Modules { get; set; }
+        public virtual ICollection<Module>? Modules { get; set; }
     }
 
     public class Module
@@ -40,9 +40,9 @@ namespace PolyglotAPI.Data.Models
         public int CourseId { get; set; }
         public virtual Course Course { get; set; }
 
-        public virtual ICollection<Lesson> Lessons { get; set; }
-        public virtual ICollection<Progress> Progresses { get; set; }
-        public virtual ICollection<Rating> Ratings { get; set; }
+        public virtual ICollection<Lesson>? Lessons { get; set; }
+        public virtual ICollection<Progress>? Progresses { get; set; }
+        public virtual ICollection<Rating>? Ratings { get; set; }
     }
 
     public class Lesson
@@ -57,8 +57,8 @@ namespace PolyglotAPI.Data.Models
         public int ModuleId { get; set; }
         public virtual Module Module { get; set; }
 
-        public virtual ICollection<Question> Questions { get; set; }
-        public virtual ICollection<Rating> Ratings { get; set; }
+        public virtual ICollection<Question>? Questions { get; set; }
+        public virtual ICollection<Rating>? Ratings { get; set; }
     }
 
     public enum QuestionType

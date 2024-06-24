@@ -72,5 +72,14 @@ namespace PolyglotAPI.Controllers
             _moduleRepository.DeleteAsync(id);
             return NoContent();
         }
+
+        // GET: api/Modules/2/Lessons
+        [HttpGet("{id}/Lessons")]
+        public async Task<ActionResult<IEnumerable<Lesson>>> GetLessonsForModule(int id)
+        {
+            _logger.LogInformation($"Getting all lessons for module with ID: {id}");
+            var lessons = await _moduleRepository.GetLessonsByModuleIdAsync(id);
+            return Ok(lessons);
+        }
     }
 }

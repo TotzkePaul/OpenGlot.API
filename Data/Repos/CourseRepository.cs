@@ -10,6 +10,7 @@ namespace PolyglotAPI.Data.Repos
         Task AddAsync(Course course);
         Task UpdateAsync(Course course);
         Task DeleteAsync(int id);
+        Task<IEnumerable<Module>> GetModulesByCourseIdAsync(int courseId);
     }
 
     public class CourseRepository : ICourseRepository
@@ -58,6 +59,13 @@ namespace PolyglotAPI.Data.Repos
                 _context.Courses.Remove(course);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<IEnumerable<Module>> GetModulesByCourseIdAsync(int courseId)
+        {
+            return await _context.Modules
+                                 .Where(m => m.CourseId == courseId)
+                                 .ToListAsync();
         }
     }
 }

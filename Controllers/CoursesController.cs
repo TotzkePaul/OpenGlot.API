@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PolyglotAPI.Data.Models;
 using PolyglotAPI.Data.Repos;
 
 
 namespace PolyglotAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CoursesController : ControllerBase
@@ -71,6 +73,15 @@ namespace PolyglotAPI.Controllers
             _logger.LogInformation($"Deleting course with ID: {id}");
             _courseRepository.DeleteAsync(id);
             return NoContent();
+        }
+
+        // GET: api/Courses/3/Modules
+        [HttpGet("{id}/Modules")]
+        public async Task<ActionResult<IEnumerable<Module>>> GetModulesForCourse(int id)
+        {
+            _logger.LogInformation($"Getting all modules for course with ID: {id}");
+            var modules = await _courseRepository.GetModulesByCourseIdAsync(id);
+            return Ok(modules);
         }
     }
 }

@@ -163,8 +163,8 @@ Questions can include audio and images to enhance the learning experience.
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/your-username/language-learning-app.git
-    cd language-learning-app
+    git clone https://github.com/OpenGlot/OpenGlot.API.git
+    cd OpenGlot.API
     ```
 
 2. Build and run the Docker container:
