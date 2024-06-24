@@ -32,6 +32,17 @@ public class Startup
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             });
 
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAllOrigins",
+                builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyHeader()
+                           .AllowAnyMethod();
+                });
+        });
+
         services.AddHealthChecks()
             .AddCheck<CustomHealthCheck>("Custom Check");
 
