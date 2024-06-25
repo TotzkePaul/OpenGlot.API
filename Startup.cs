@@ -1,16 +1,21 @@
 ﻿using Amazon.Runtime.Internal;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PolyglotAPI.Authentication;
 using PolyglotAPI.Configs;
 using PolyglotAPI.Data;
+using PolyglotAPI.Data.Models;
 using PolyglotAPI.Data.Repos;
 using PolyglotAPI.Health;
 using System.Configuration;
 using System.Text.Json.Serialization;
+using static PolyglotAPI.Authentication.Authorization;
 
 public class Startup
 {
@@ -79,6 +84,8 @@ public class Startup
         var jwtBearerOptions = new JwtBearerOptionsConfig();
         Configuration.Bind("JwtBearerOptions", jwtBearerOptions);
 
+        Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
 
         services.AddAuthentication(options =>
         {
@@ -120,6 +127,15 @@ public class Startup
                 ValidateAudience = false
             };
         });
+        
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AdminPolicy", policy =>
+                policy.Requirements.Add(new RoleRequirement(UserRole.Admin)));
+        });
+
+        services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
 
         var connectionString = Configuration.GetConnectionString("DefaultConnection");
         Console.WriteLine("Connection String: " + connectionString);

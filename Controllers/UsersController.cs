@@ -192,5 +192,85 @@ namespace PolyglotAPI.Controllers
             var progresses = await _userRepository.GetUserProgressesAsync(id);
             return Ok(progresses);
         }
+
+        [Authorize(Policy = "AdminPolicy")]
+        [HttpGet("Admin")]
+        public async Task<ActionResult<string>> ValidateAdmin()
+        {
+            return Ok("Success");
+        }
+
+        // POST: api/Users/Register
+        [HttpPost("Register")]
+        public async Task<IActionResult> RegisterUser(UserProfile user)
+        {
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            if (claimsIdentity == null)
+            {
+                return Unauthorized("Unable to retrieve user claims.");
+            }
+
+            var sub = claimsIdentity.FindFirst(c => c.Type == "sub")?.Value;
+            var email = claimsIdentity.FindFirst(c => c.Type == "email")?.Value;
+            var name = claimsIdentity.FindFirst(c => c.Type == "name")?.Value;
+
+            if (string.IsNullOrEmpty(sub) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(name))
+            {
+                return BadRequest("Invalid token information.");
+            }
+
+            user.UserId = Guid.Parse(sub);
+            user.Email = email;
+            user.Username = name;
+            
+            
+
+            try
+            {
+                await _userRepository.AddUserAsync(user);
+                return CreatedAtAction(nameof(GetUser), new { id = user.UserId }, user);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error registering user: {0}", ex.Message);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPost("Login")]
+        public async Task<IActionResult> LoginUser()
+        {
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            if (claimsIdentity == null)
+            {
+                return Unauthorized("Unable to retrieve user claims.");
+            }
+
+            var sub = claimsIdentity.FindFirst(c => c.Type == "sub")?.Value;
+            var email = claimsIdentity.FindFirst(c => c.Type == "email")?.Value;
+            var name = claimsIdentity.FindFirst(c => c.Type == "name")?.Value;
+
+            if (string.IsNullOrEmpty(sub) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(name))
+            {
+                return BadRequest("Invalid token information.");
+            }
+
+            try
+            {
+                var user = await _userRepository.GetUserByIdAsync(Guid.Parse(sub));
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                } else
+                {
+                    return Ok(user);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error registering user: {0}", ex.Message);
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 }

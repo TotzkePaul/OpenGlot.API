@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PolyglotAPI.Data.Models;
 using PolyglotAPI.Data.Repos;
 
 
 namespace PolyglotAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ModulesController : ControllerBase

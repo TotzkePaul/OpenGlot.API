@@ -24,13 +24,13 @@
         public string TimeZone { get; set; }
         public UserRole UserRole { get; set; }
 
-        public ICollection<Rating> Ratings { get; set; }
-        public ICollection<Progress> Progresses { get; set; }
-        public ICollection<Badge> Badges { get; set; }
-        public ICollection<Notification> Notifications { get; set; }
-        public ICollection<Flashcard> Flashcards { get; set; }
-        public ICollection<UserGeneratedContent> UserGeneratedContents { get; set; }
-        public Subscription Subscription { get; set; }
+        public ICollection<Rating>? Ratings { get; set; }
+        public ICollection<Progress>? Progresses { get; set; }
+        public ICollection<Badge>? Badges { get; set; }
+        public ICollection<Notification>? Notifications { get; set; }
+        public ICollection<Flashcard>? Flashcards { get; set; }
+        public ICollection<UserGeneratedContent>? UserGeneratedContents { get; set; }
+        public Subscription? Subscription { get; set; }
     }
 
     public class Role
