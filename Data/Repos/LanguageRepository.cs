@@ -52,7 +52,7 @@ namespace PolyglotAPI.Data.Repos
 
         public async Task DeleteAsync(int id)
         {
-            var language = await _context.Languages.FindAsync(id);
+            var language = await GetByIdAsync(id);
             if (language != null)
             {
                 _context.Languages.Remove(language);

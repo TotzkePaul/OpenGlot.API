@@ -65,7 +65,7 @@ public class UserRepository : IUserRepository
 
         public async Task DeleteUserAsync(Guid userId)
         {
-            var user = await _context.UserProfiles.FindAsync(userId);
+            var user = await GetUserByIdAsync(userId);
             if (user != null)
             {
                 _context.UserProfiles.Remove(user);

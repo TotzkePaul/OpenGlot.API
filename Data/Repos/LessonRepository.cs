@@ -56,7 +56,7 @@ namespace PolyglotAPI.Data.Repos
 
         public async Task DeleteAsync(int id)
         {
-            var lesson = await _context.Lessons.FindAsync(id);
+            var lesson = await GetByIdAsync(id);
             if (lesson != null)
             {
                 _context.Lessons.Remove(lesson);

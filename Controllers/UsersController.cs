@@ -49,7 +49,7 @@ namespace PolyglotAPI.Controllers
             return Ok(user);
         }
         
-        [HttpPut]
+        [HttpPost]
         public async Task<ActionResult<UserProfile>> AddUser(UserProfile user)
         {
             _logger.LogInformation("Adding a new user");
@@ -57,7 +57,7 @@ namespace PolyglotAPI.Controllers
             return CreatedAtAction(nameof(GetUser), new { id = user.UserId }, user);
         }
 
-        [HttpPost("{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(Guid id, UserProfile user)
         {
             if (id != user.UserId)

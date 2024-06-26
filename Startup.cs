@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PolyglotAPI.Authentication;
+using PolyglotAPI.Common;
 using PolyglotAPI.Configs;
 using PolyglotAPI.Data;
 using PolyglotAPI.Data.Models;
@@ -56,6 +57,8 @@ public class Startup
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
+
+            c.DocumentFilter<HealthCheckOperationFilter>();
 
             // Add the following lines to configure Bearer authentication
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -183,11 +186,8 @@ public class Startup
 
         app.UseEndpoints(endpoints =>
         {
+            endpoints.MapHealthChecks(HealthCheckOperationFilter.HealthCheckEndpoint);
             endpoints.MapControllers();
-            endpoints.MapHealthChecks("/api/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-            {
-                Predicate = (check) => true
-            });
         });
 
         if (env.IsDevelopment())

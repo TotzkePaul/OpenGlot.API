@@ -48,7 +48,7 @@ namespace PolyglotAPI.Data.Repos
 
         public async Task DeleteAsync(int id)
         {
-            var module = await _context.Modules.FindAsync(id);
+            var module = await GetByIdAsync(id);
             if (module != null)
             {
                 _context.Modules.Remove(module);
