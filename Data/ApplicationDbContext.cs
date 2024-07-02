@@ -16,7 +16,6 @@ namespace PolyglotAPI.Data
         public DbSet<Audio> Audios { get; set; }
         public DbSet<Image> Images { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
-        public DbSet<Role> Roles { get; set; }
         public DbSet<Rating> Ratings { get; set; }
         public DbSet<Progress> Progresses { get; set; }
         public DbSet<Badge> Badges { get; set; }
@@ -65,12 +64,6 @@ namespace PolyglotAPI.Data
                 entity.HasMany(e => e.UserGeneratedContents)
                       .WithOne(e => e.User)
                       .HasForeignKey(e => e.UserId);
-            });
-
-            // Role configuration
-            modelBuilder.Entity<Role>(entity =>
-            {
-                entity.HasKey(e => e.RoleId);
             });
 
             // Rating configuration

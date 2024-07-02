@@ -33,13 +33,6 @@
         public Subscription? Subscription { get; set; }
     }
 
-    public class Role
-    {
-        [Key]
-        public int RoleId { get; set; }
-        public string RoleName { get; set; }
-    }
-
     public enum UserRole
     {
         User,
