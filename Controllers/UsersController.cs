@@ -67,7 +67,7 @@ namespace PolyglotAPI.Controllers
             }
 
             // Check if users is 18 years or older
-            if (user.DateOfBirth.Date.AddYears(18) > DateTime.Today.Date)
+            if (user.DateOfBirth?.Date.AddYears(18) > DateTime.Today.Date)
             {
                 return BadRequest("User must be 18 years or older");
             }

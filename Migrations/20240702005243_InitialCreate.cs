@@ -13,13 +13,33 @@ namespace PolyglotAPI.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Audios",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UrlKey = table.Column<string>(type: "text", nullable: false),
+                    Transcript = table.Column<string>(type: "text", nullable: false),
+                    EnglishTranslation = table.Column<string>(type: "text", nullable: false),
+                    SentenceId = table.Column<string>(type: "text", nullable: false),
+                    LanguageCode = table.Column<string>(type: "text", nullable: false),
+                    UploadedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Audios", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Images",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UrlKey = table.Column<string>(type: "text", nullable: false),
+                    Context = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
+                    EnhancedDescription = table.Column<string>(type: "text", nullable: false),
                     UploadedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -80,14 +100,14 @@ namespace PolyglotAPI.Migrations
                     Email = table.Column<string>(type: "text", nullable: false),
                     NativeLanguage = table.Column<string>(type: "text", nullable: false),
                     TargetLanguage = table.Column<string>(type: "text", nullable: false),
-                    TargetLanguageLevel = table.Column<string>(type: "text", nullable: false),
+                    TargetLanguageLevel = table.Column<string>(type: "text", nullable: true),
                     TargetLanguage2 = table.Column<string>(type: "text", nullable: true),
                     TargetLanguageLevel2 = table.Column<string>(type: "text", nullable: true),
                     TargetLanguage3 = table.Column<string>(type: "text", nullable: true),
                     TargetLanguageLevel3 = table.Column<string>(type: "text", nullable: true),
-                    DateOfBirth = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    TimeZone = table.Column<string>(type: "text", nullable: false),
-                    UserRole = table.Column<int>(type: "integer", nullable: false)
+                    DateOfBirth = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    TimeZone = table.Column<string>(type: "text", nullable: true),
+                    UserRole = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -112,29 +132,6 @@ namespace PolyglotAPI.Migrations
                         column: x => x.StorybookId,
                         principalTable: "InteractiveStorybooks",
                         principalColumn: "StorybookId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Audios",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UrlKey = table.Column<string>(type: "text", nullable: false),
-                    Transcript = table.Column<string>(type: "text", nullable: false),
-                    EnglishTranslation = table.Column<string>(type: "text", nullable: false),
-                    LanguageId = table.Column<int>(type: "integer", nullable: false),
-                    UploadedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Audios", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Audios_Languages_LanguageId",
-                        column: x => x.LanguageId,
-                        principalTable: "Languages",
-                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -276,6 +273,7 @@ namespace PolyglotAPI.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
+                    Order = table.Column<int>(type: "integer", nullable: true),
                     CourseId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -298,6 +296,7 @@ namespace PolyglotAPI.Migrations
                     Title = table.Column<string>(type: "text", nullable: false),
                     ContentType = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Order = table.Column<int>(type: "integer", nullable: true),
                     ModuleId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -320,6 +319,7 @@ namespace PolyglotAPI.Migrations
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     CourseId = table.Column<int>(type: "integer", nullable: true),
                     ModuleId = table.Column<int>(type: "integer", nullable: true),
+                    LessonId = table.Column<int>(type: "integer", nullable: true),
                     CompletionPercentage = table.Column<int>(type: "integer", nullable: false),
                     LastUpdated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -330,6 +330,11 @@ namespace PolyglotAPI.Migrations
                         name: "FK_Progresses_Courses_CourseId",
                         column: x => x.CourseId,
                         principalTable: "Courses",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Progresses_Modules_LessonId",
+                        column: x => x.LessonId,
+                        principalTable: "Modules",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Progresses_Modules_ModuleId",
@@ -352,7 +357,8 @@ namespace PolyglotAPI.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Text = table.Column<string>(type: "text", nullable: false),
                     QuestionType = table.Column<int>(type: "integer", nullable: false),
-                    Answer = table.Column<string>(type: "text", nullable: false),
+                    Answer = table.Column<Guid>(type: "uuid", nullable: false),
+                    Order = table.Column<int>(type: "integer", nullable: true),
                     LessonId = table.Column<int>(type: "integer", nullable: false),
                     AudioId = table.Column<int>(type: "integer", nullable: true),
                     ImageId = table.Column<int>(type: "integer", nullable: true)
@@ -418,8 +424,7 @@ namespace PolyglotAPI.Migrations
                 name: "Options",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Text = table.Column<string>(type: "text", nullable: false),
                     AudioId = table.Column<int>(type: "integer", nullable: true),
                     ImageId = table.Column<int>(type: "integer", nullable: true),
@@ -445,11 +450,6 @@ namespace PolyglotAPI.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Audios_LanguageId",
-                table: "Audios",
-                column: "LanguageId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Badges_UserId",
@@ -500,6 +500,11 @@ namespace PolyglotAPI.Migrations
                 name: "IX_Progresses_CourseId",
                 table: "Progresses",
                 column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Progresses_LessonId",
+                table: "Progresses",
+                column: "LessonId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Progresses_ModuleId",

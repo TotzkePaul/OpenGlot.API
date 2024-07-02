@@ -34,8 +34,13 @@ namespace PolyglotAPI.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("LanguageId")
-                        .HasColumnType("integer");
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SentenceId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Transcript")
                         .IsRequired()
@@ -49,8 +54,6 @@ namespace PolyglotAPI.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LanguageId");
 
                     b.ToTable("Audios");
                 });
@@ -143,7 +146,15 @@ namespace PolyglotAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Context")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("EnhancedDescription")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -229,6 +240,9 @@ namespace PolyglotAPI.Migrations
                     b.Property<int>("ModuleId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("Order")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
@@ -254,6 +268,9 @@ namespace PolyglotAPI.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int?>("Order")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -294,11 +311,9 @@ namespace PolyglotAPI.Migrations
 
             modelBuilder.Entity("PolyglotAPI.Data.Models.Option", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<int?>("AudioId")
                         .HasColumnType("integer");
@@ -341,6 +356,9 @@ namespace PolyglotAPI.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int?>("LessonId")
+                        .HasColumnType("integer");
+
                     b.Property<int?>("ModuleId")
                         .HasColumnType("integer");
 
@@ -350,6 +368,8 @@ namespace PolyglotAPI.Migrations
                     b.HasKey("ProgressId");
 
                     b.HasIndex("CourseId");
+
+                    b.HasIndex("LessonId");
 
                     b.HasIndex("ModuleId");
 
@@ -366,9 +386,8 @@ namespace PolyglotAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Answer")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("Answer")
+                        .HasColumnType("uuid");
 
                     b.Property<int?>("AudioId")
                         .HasColumnType("integer");
@@ -377,6 +396,9 @@ namespace PolyglotAPI.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("LessonId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("Order")
                         .HasColumnType("integer");
 
                     b.Property<int>("QuestionType")
@@ -544,10 +566,9 @@ namespace PolyglotAPI.Migrations
             modelBuilder.Entity("PolyglotAPI.Data.Models.UserProfile", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("DateOfBirth")
+                    b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
@@ -569,7 +590,6 @@ namespace PolyglotAPI.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("TargetLanguageLevel")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("TargetLanguageLevel2")
@@ -579,10 +599,9 @@ namespace PolyglotAPI.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("TimeZone")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("UserRole")
+                    b.Property<int?>("UserRole")
                         .HasColumnType("integer");
 
                     b.Property<string>("Username")
@@ -592,17 +611,6 @@ namespace PolyglotAPI.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("UserProfiles");
-                });
-
-            modelBuilder.Entity("PolyglotAPI.Data.Models.Audio", b =>
-                {
-                    b.HasOne("PolyglotAPI.Data.Models.Language", "Language")
-                        .WithMany()
-                        .HasForeignKey("LanguageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Language");
                 });
 
             modelBuilder.Entity("PolyglotAPI.Data.Models.Badge", b =>
@@ -700,6 +708,10 @@ namespace PolyglotAPI.Migrations
                         .WithMany()
                         .HasForeignKey("CourseId");
 
+                    b.HasOne("PolyglotAPI.Data.Models.Module", "Lesson")
+                        .WithMany()
+                        .HasForeignKey("LessonId");
+
                     b.HasOne("PolyglotAPI.Data.Models.Module", "Module")
                         .WithMany("Progresses")
                         .HasForeignKey("ModuleId");
@@ -711,6 +723,8 @@ namespace PolyglotAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Course");
+
+                    b.Navigation("Lesson");
 
                     b.Navigation("Module");
 
@@ -844,8 +858,7 @@ namespace PolyglotAPI.Migrations
 
                     b.Navigation("Ratings");
 
-                    b.Navigation("Subscription")
-                        .IsRequired();
+                    b.Navigation("Subscription");
 
                     b.Navigation("UserGeneratedContents");
                 });

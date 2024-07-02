@@ -6,6 +6,7 @@ namespace PolyglotAPI.Data
 {
     public class ApplicationDbContext : DbContext
     {
+        // DbSets for the entities
         public DbSet<Language> Languages { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<Module> Modules { get; set; }
@@ -26,16 +27,20 @@ namespace PolyglotAPI.Data
         public DbSet<InteractiveStorybook> InteractiveStorybooks { get; set; }
         public DbSet<StoryChoice> StoryChoices { get; set; }
 
+        // Constructor
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 
+        // OnModelCreating method
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // UserProfile configuration
             modelBuilder.Entity<UserProfile>(entity =>
             {
                 entity.HasKey(e => e.UserId);
+
+                entity.Property(e => e.UserId).ValueGeneratedNever();
 
                 entity.HasMany(e => e.Ratings)
                       .WithOne(e => e.User)
@@ -181,7 +186,7 @@ namespace PolyglotAPI.Data
             // Audio configuration
             modelBuilder.Entity<Audio>(entity =>
             {
-                entity.HasKey(e => e.Id);
+                entity.HasKey(e => new { e.Id});
             });
 
             // Image configuration
@@ -202,6 +207,10 @@ namespace PolyglotAPI.Data
                 entity.HasOne(e => e.Image)
                       .WithMany()
                       .HasForeignKey(e => e.ImageId);
+
+                entity.HasOne(e => e.Question)
+                      .WithMany(e => e.Options)
+                      .HasForeignKey(e => e.QuestionId);
             });
 
             // Badge configuration

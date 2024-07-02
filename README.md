@@ -1,11 +1,8 @@
-Sure, here's a comprehensive `README.md` for your Language Learning Application:
-
-```markdown
 # Language Learning Application
 
 ## Overview
 
-The Language Learning Application is a comprehensive platform designed to facilitate language learning through interactive lessons, multimedia content, AI-powered chatbots, and user-generated content. The app supports various user roles, including Users, Reviewers, Creators, Admins, and SuperAdmins, providing a robust framework for both learners and content creators. This uses AWS Cognito for Authentication.  
+The Language Learning Application is a comprehensive platform designed to facilitate language learning through interactive lessons, multimedia content, AI-powered chatbots, and user-generated content. The application supports various user roles, including Users, Reviewers, Creators, Admins, and SuperAdmins, providing a robust framework for both learners and content creators. The app uses AWS Cognito for Authentication and runs seamlessly in a Docker containerized environment.
 
 ## Table of Contents
 
@@ -25,7 +22,11 @@ The Language Learning Application is a comprehensive platform designed to facili
   - [API Endpoints](#api-endpoints)
 - [Setup](#setup)
   - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
   - [Running the Application](#running-the-application)
+- [Usage](#usage)
+  - [Uploading CSV Files](#uploading-csv-files)
+  - [Example Requests](#example-requests)
 - [Contributing](#contributing)
 - [License](#license)
 - [Contact](#contact)
@@ -54,8 +55,6 @@ The application supports several types of questions, including:
 - True or False
 - Multiple Choice
 - Reorder the Sentence (Unjumble)
-
-Questions can include audio and images to enhance the learning experience.
 
 ### Multimedia Content
 
@@ -110,45 +109,14 @@ Questions can include audio and images to enhance the learning experience.
 - `POST /api/Users` - Add a new user
 - `PUT /api/Users/{id}` - Update a user
 - `DELETE /api/Users/{id}` - Delete a user
-- `POST /api/Users/{id}/Roles` - Update a role to a user
-- `DELETE /api/Users/{id}/Roles/{roleId}` - Remove a role from a user
-- `GET /api/Users/{id}/Profile` - Retrieve a user by ID
-- `GET /api/Users/{id}/Badges` - Retrieve a user's Badges
-- `GET /api/Users/{id}/Notifications` - Retrieve a user's Notifications
-- `GET /api/Users/{id}/Flashcards` - Retrieve a user's Flashcards
-- `GET /api/Users/{id}/Progress` - Retrieve a user's Progress
+- ... (other endpoints)
 
-#### Languages
+#### Files Controller
 
-- `GET /api/Languages` - Retrieve all languages
-- `GET /api/Languages/{id}` - Retrieve a language by ID
-- `POST /api/Languages` - Add a new language
-- `PUT /api/Languages/{id}` - Update a language
-- `DELETE /api/Languages/{id}` - Delete a language
+- `POST /api/Files/upload-images` - Upload a CSV file to add images
+- `POST /api/Files/upload-audio` - Upload a CSV file to add audio
 
-#### Courses
-
-- `GET /api/Courses` - Retrieve all courses
-- `GET /api/Courses/{id}` - Retrieve a course by ID
-- `POST /api/Courses` - Add a new course
-- `PUT /api/Courses/{id}` - Update a course
-- `DELETE /api/Courses/{id}` - Delete a course
-
-#### Modules
-
-- `GET /api/Modules` - Retrieve all modules
-- `GET /api/Modules/{id}` - Retrieve a module by ID
-- `POST /api/Modules` - Add a new module
-- `PUT /api/Modules/{id}` - Update a module
-- `DELETE /api/Modules/{id}` - Delete a module
-
-#### Lessons
-
-- `GET /api/Lessons` - Retrieve all lessons
-- `GET /api/Lessons/{id}` - Retrieve a lesson by ID
-- `POST /api/Lessons` - Add a new lesson
-- `PUT /api/Lessons/{id}` - Update a lesson
-- `DELETE /api/Lessons/{id}` - Delete a lesson
+For more details on API endpoints, please refer to the provided documentation or Swagger UI.
 
 ## Setup
 
@@ -157,8 +125,9 @@ Questions can include audio and images to enhance the learning experience.
 - Docker
 - .NET 8 SDK
 - PostgreSQL
+- AWS Cognito setup for user authentication
 
-### Running the Application
+### Installation
 
 1. Clone the repository:
 
@@ -167,27 +136,73 @@ Questions can include audio and images to enhance the learning experience.
     cd OpenGlot.API
     ```
 
-2. Build and run the Docker container:
+2. Ensure PostgreSQL is running and update the connection string in `appsettings.json`:
+
+    ```json
+    "ConnectionStrings": {
+        "DefaultConnection": "Host=localhost;Port=5432;Database=mydatabase;Username=myuser;Password=mypassword"
+    }
+    ```
+
+### Running the Application
+
+1. Build and run the Docker container:
 
     ```bash
     docker build -t language-learning-app .
-    docker run -p 8080:8080 -p 8081:8081 language-learning-app
+    docker run -p 8080:8080 -p 8081:8081 --name language-learning-app -v $(pwd)/data:/app/data language-learning-app
     ```
 
-3. Navigate to `http://localhost:8080` in your browser to access the application.
+2. Navigate to `http://localhost:8080` in your browser to access the application.
+
+## Usage
+
+### Uploading CSV Files
+
+To upload images or audio files through CSV:
+
+1. **Images CSV Format**:
+    - Columns: `image_id`, `context`, `original_description`, `enhanced_description`, `file_name`
+
+    Example:
+
+    ```csv
+    image_id,context,original_description,enhanced_description,file_name
+    1,Scene,Original desc 1,Enhanced desc 1,image1.jpg
+    2,Scene,Original desc 2,Enhanced desc 2,image2.jpg
+    ```
+
+2. **Audio CSV Format**:
+    - Columns: `sentence_id`, `language`, `sentence`, `file_name`
+
+    Example:
+
+    ```csv
+    sentence_id,language,sentence,file_name
+    101,en,Hello world,audio1.mp3
+    102,es,Hola mundo,audio2.mp3
+    ```
+
+Upload the CSV file using the corresponding API endpoint through Swagger UI or a REST client:
+- `POST /api/Files/upload-images`
+- `POST /api/Files/upload-audio`
+
+### Example Requests
+
+**Upload Images Example**:
+
+```http
+POST /api/Files/upload-images
+Content-Type: multipart/form-data
+```
+
+**Upload Audio Example**:
+
+```http
+POST /api/Files/upload-audio
+Content-Type: multipart/form-data
+```
 
 ## Contributing
 
 We welcome contributions from the community! Please check our [contributing guidelines](CONTRIBUTING.md) for more information on how to get started.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Contact
-
-For any questions or concerns, please open an issue or contact [your-email@example.com](mailto:your-email@example.com).
-
-```
-
-This `README.md` provides an overview of the app, lists its features, provides technical details, instructions for setting up and running the application, and information on how to contribute and contact the maintainers. Feel free to adjust the sections according to your project's specific needs.

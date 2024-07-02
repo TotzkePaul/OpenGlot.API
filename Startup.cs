@@ -152,6 +152,7 @@ public class Startup
         services.AddScoped<ICourseRepository, CourseRepository>();
         services.AddScoped<IModuleRepository, ModuleRepository>();
         services.AddScoped<ILessonRepository, LessonRepository>();
+        services.AddScoped<IFilesRepository, FilesRepository>();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

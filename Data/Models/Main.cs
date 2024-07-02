@@ -35,6 +35,7 @@ namespace PolyglotAPI.Data.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        public int? Order { get; set; }
 
         [ForeignKey(nameof(Course))]
         public int CourseId { get; set; }
@@ -52,6 +53,7 @@ namespace PolyglotAPI.Data.Models
         public string Title { get; set; }
         public ContentType ContentType { get; set; }
         public DateTime CreatedAt { get; set; }
+        public int? Order { get; set; }
 
         [ForeignKey(nameof(Module))]
         public int ModuleId { get; set; }
@@ -78,7 +80,8 @@ namespace PolyglotAPI.Data.Models
         public int Id { get; set; }
         public string Text { get; set; }
         public QuestionType QuestionType { get; set; }
-        public string Answer { get; set; }
+        public Guid Answer { get; set; }
+        public int? Order { get; set; }
 
         [ForeignKey(nameof(Lesson))]
         public int LessonId { get; set; }
@@ -98,7 +101,7 @@ namespace PolyglotAPI.Data.Models
     public class Option
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Text { get; set; }
 
         [ForeignKey(nameof(Audio))]
@@ -161,6 +164,11 @@ namespace PolyglotAPI.Data.Models
         [ForeignKey(nameof(Module))]
         public int? ModuleId { get; set; }
         public Module Module { get; set; }
+
+        [ForeignKey(nameof(Lesson))]
+        public int? LessonId { get; set; }
+        public Module Lesson { get; set; }
+
         public int CompletionPercentage { get; set; }
         public DateTime LastUpdated { get; set; }
     }
@@ -196,9 +204,8 @@ namespace PolyglotAPI.Data.Models
         public string UrlKey { get; set; }
         public string Transcript { get; set; }
         public string EnglishTranslation { get; set; }
-        [ForeignKey(nameof(Language))]
-        public int LanguageId { get; set; }
-        public virtual Language Language { get; set; }
+        public string SentenceId { get; set; }
+        public string LanguageCode { get; set; }
 
         public DateTime UploadedAt { get; set; }
     }
@@ -207,8 +214,10 @@ namespace PolyglotAPI.Data.Models
     {
         [Key]
         public int Id { get; set; }
-        public string UrlKey { get; set; }
+        public string UrlKey { get; set; } // UrlKey is FileName
+        public string Context { get; set; }
         public string Description { get; set; }
+        public string EnhancedDescription { get; set; }
         public DateTime UploadedAt { get; set; }
     }
 
